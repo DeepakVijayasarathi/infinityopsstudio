@@ -153,7 +153,7 @@ async function main() {
     { name: "Holiday re-engagement", objective: "SALES", status: "DRAFT", budget: 750000, start: -40, end: -75, channels: ["Email", "Meta Ads"], audience: "Churned and dormant trial accounts" },
   ] as const;
 
-  const campaigns = [];
+  const campaigns: Awaited<ReturnType<typeof db.campaign.create>>[] = [];
   for (const [i, c] of campaignDefs.entries()) {
     const strategy = i < 3 ? await gen(`Plan a marketing campaign for the brief below.\n\nBrief: ${c.name}`, BRAND_SYSTEM) : null;
     const campaign = await db.campaign.create({
@@ -230,7 +230,7 @@ async function main() {
   const last = ["Johnson", "Williams", "Garcia", "Martinez", "Nguyen", "Kim", "Okafor", "Schmidt", "Rossi", "Silva", "Patel", "Hughes", "Dubois", "Andersson", "Tanaka", "Kowalski", "Haddad", "Murphy", "Costa", "Novak"];
   const companies = ["Coastal Freight", "BluePeak Logistics", "Harbor Distribution", "Summit 3PL", "Evergreen Supply", "Metro Parcel", "Atlas Cold Chain", "Redwood Wholesale", "Prairie Fulfillment", "Keystone Carriers", "Lakeside Foods", "Urban Courier Co", "Pioneer Building Supply", "Northstar Pharma Logistics", "Beacon Retail Group", "Granite Auto Parts", "Sunset Beverage", "Ironwood Furniture", "Cascade Medical Supply", "Horizon Home Goods"];
   const titles = ["VP Operations", "Director of Logistics", "Fleet Manager", "Head of Supply Chain", "COO", "Operations Manager", "Transportation Manager", "Founder & CEO", "Logistics Coordinator", "Director of Fulfillment"];
-  const sources: LeadSource[] = ["WEBSITE", "WEBSITE", "ADS", "SOCIAL", "EMAIL", "REFERRAL", "EVENT", "SEO" as LeadSource].filter((s) => s !== ("SEO" as LeadSource));
+  const sources: LeadSource[] = ["WEBSITE", "WEBSITE", "ADS", "SOCIAL", "EMAIL", "REFERRAL", "EVENT"];
   const statusWeights: LeadStatus[] = ["NEW", "NEW", "NEW", "CONTACTED", "CONTACTED", "QUALIFIED", "QUALIFIED", "PROPOSAL", "WON", "LOST"];
   const leadIds: string[] = [];
   const usedEmails = new Set<string>();

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const SESSION_COOKIE = "ios_session";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 // Server-to-server endpoints authenticated by signatures/tokens instead of cookies.
-const CSRF_EXEMPT = ["/api/v1/billing/webhooks/", "/api/v1/hooks/", "/api/v1/email/track/"];
+const CSRF_EXEMPT = ["/api/v1/billing/webhooks/", "/api/v1/hooks/", "/api/v1/email/track/", "/api/v1/email/unsubscribe/"];
 
 function allowedOrigins(req: NextRequest): Set<string> {
   const set = new Set<string>([req.nextUrl.origin]);

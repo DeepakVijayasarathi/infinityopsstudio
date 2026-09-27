@@ -216,7 +216,7 @@ async function deliver(provider: EmailProvider, workspaceName: string, campaign:
   if (!send) return false;
   const rendered = renderCampaignEmail({ subject: campaign.subject, body: campaign.body, previewText: campaign.previewText, token, lead, workspaceName });
   try {
-    await provider.send({ to: lead.email, subject: rendered.subject, html: rendered.html, text: rendered.text, headers: { "List-Unsubscribe": `<${rendered.unsubscribe}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } });
+    await provider.send({ to: lead.email, subject: rendered.subject, html: rendered.html, text: rendered.text, headers: { "List-Unsubscribe": `<${env().APP_URL}/api/v1/email/unsubscribe/${token}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } });
     await db.emailSend.update({ where: { id: send.id }, data: { status: "SENT", sentAt: new Date() } });
     await db.lead.update({ where: { id: lead.id }, data: { lastContactedAt: new Date() } });
     await logActivity(campaign.workspaceId, lead.id, "EMAIL_SENT", `Email sent: ${rendered.subject}`, null, { emailCampaignId: campaign.id, step });
