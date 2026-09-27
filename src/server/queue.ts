@@ -2,7 +2,7 @@ import { Queue, type JobsOptions } from "bullmq";
 import { env } from "./env";
 import { logger } from "./logger";
 
-export const QUEUES = ["ai", "email", "social", "workflows", "analytics", "reports", "notifications", "scheduler"] as const;
+export const QUEUES = ["ai", "email", "social", "workflows", "analytics", "reports", "scheduler"] as const;
 export type QueueName = (typeof QUEUES)[number];
 
 export type JobPayloads = {
@@ -12,7 +12,6 @@ export type JobPayloads = {
   workflows: { kind: "run-execution"; executionId: string };
   analytics: { kind: "sync-workspace"; workspaceId: string };
   reports: { kind: "campaign-report"; campaignId: string; workspaceId: string };
-  notifications: { kind: "digest"; userId: string };
   scheduler: { kind: "tick" };
 };
 

@@ -24,8 +24,11 @@ export type IntegrationDefinition = {
   fields: IntegrationField[];
   capabilities: string[];
   docsUrl?: string;
-  /** "available" providers can be connected; "admin" ones are configured platform-wide. */
-  availability: "available" | "admin";
+  /**
+   * "available" providers can be connected; "admin" ones are configured platform-wide;
+   * "coming_soon" ones are listed on the roadmap and cannot be connected yet.
+   */
+  availability: "available" | "admin" | "coming_soon";
   test?: (config: Record<string, string>, credentials: Record<string, string>) => Promise<TestResult>;
 };
 
@@ -58,9 +61,9 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   // Social
   {
     key: "linkedin", name: "LinkedIn", category: "Social Media", logo: "in", color: "#0a66c2", availability: "available",
-    description: "Publish posts to LinkedIn profiles and company pages and sync engagement.",
+    description: "Publish posts to LinkedIn profiles and company pages.",
     fields: [tokenField("OAuth access token", "Token with w_member_social scope."), { key: "authorUrn", label: "Author URN", type: "text", required: true, placeholder: "urn:li:organization:123456" }],
-    capabilities: ["publish", "analytics"],
+    capabilities: ["publish"],
     docsUrl: "https://learn.microsoft.com/linkedin/marketing/",
     test: (_c, cr) => probe("https://api.linkedin.com/v2/userinfo", { headers: { authorization: `Bearer ${cr.accessToken}` } }, "LinkedIn token is valid"),
   },
@@ -68,7 +71,7 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
     key: "meta", name: "Meta (Facebook & Instagram)", category: "Social Media", logo: "f", color: "#1877f2", availability: "available",
     description: "Publish to Facebook Pages and Instagram Business accounts.",
     fields: [tokenField("Page access token"), { key: "pageId", label: "Facebook Page ID", type: "text", required: true }, { key: "instagramId", label: "Instagram Business ID", type: "text" }],
-    capabilities: ["publish", "analytics"],
+    capabilities: ["publish"],
     docsUrl: "https://developers.facebook.com/docs/graph-api/",
     test: (c, cr) => probe(`https://graph.facebook.com/v19.0/${encodeURIComponent(c.pageId ?? "me")}?fields=id,name`, { headers: { authorization: `Bearer ${cr.accessToken}` } }, "Meta page token is valid"),
   },
@@ -82,14 +85,14 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   },
   {
     key: "youtube", name: "YouTube", category: "Social Media", logo: "▶", color: "#ff0000", availability: "available",
-    description: "Sync channel analytics. Video uploads are prepared here and published from YouTube Studio.",
+    description: "Sync your channel's subscriber count daily. Video uploads are prepared here and published from YouTube Studio.",
     fields: [{ key: "apiKey", label: "YouTube Data API key", type: "password", required: true, secret: true }, { key: "channelId", label: "Channel ID", type: "text", required: true }],
     capabilities: ["analytics"],
     test: (c, cr) => probe(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${encodeURIComponent(c.channelId ?? "")}&key=${encodeURIComponent(cr.apiKey ?? "")}`, {}, "YouTube API key is valid"),
   },
   {
-    key: "tiktok", name: "TikTok", category: "Social Media", logo: "♪", color: "#00c2b8", availability: "available",
-    description: "Plan TikTok content and track performance. Publishing requires TikTok Content Posting API approval.",
+    key: "tiktok", name: "TikTok", category: "Social Media", logo: "♪", color: "#00c2b8", availability: "coming_soon",
+    description: "Track TikTok performance alongside your other channels.",
     fields: [tokenField("Access token")],
     capabilities: ["analytics"],
     test: (_c, cr) => probe("https://open.tiktokapis.com/v2/user/info/?fields=display_name", { headers: { authorization: `Bearer ${cr.accessToken}` } }, "TikTok token is valid"),
@@ -108,7 +111,7 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
     capabilities: ["send"],
   },
   {
-    key: "mailchimp", name: "Mailchimp", category: "Email", logo: "M", color: "#ffe01b", availability: "available",
+    key: "mailchimp", name: "Mailchimp", category: "Email", logo: "M", color: "#ffe01b", availability: "coming_soon",
     description: "Sync audiences and subscriber status with Mailchimp.",
     fields: [{ key: "apiKey", label: "API key", type: "password", required: true, secret: true, placeholder: "xxxx-us21" }],
     capabilities: ["contacts-sync"],
@@ -120,13 +123,13 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   },
   // Analytics
   {
-    key: "google-analytics", name: "Google Analytics 4", category: "Analytics", logo: "GA", color: "#f9ab00", availability: "available",
+    key: "google-analytics", name: "Google Analytics 4", category: "Analytics", logo: "GA", color: "#f9ab00", availability: "coming_soon",
     description: "Import sessions, conversions and traffic sources into Analytics.",
     fields: [{ key: "propertyId", label: "GA4 property ID", type: "text", required: true }, { key: "serviceAccountJson", label: "Service account JSON", type: "password", required: true, secret: true }],
     capabilities: ["analytics"],
   },
   {
-    key: "plausible", name: "Plausible", category: "Analytics", logo: "P", color: "#5850ec", availability: "available",
+    key: "plausible", name: "Plausible", category: "Analytics", logo: "P", color: "#5850ec", availability: "coming_soon",
     description: "Privacy-friendly website analytics.",
     fields: [{ key: "siteId", label: "Site domain", type: "text", required: true }, { key: "apiKey", label: "API key", type: "password", required: true, secret: true }],
     capabilities: ["analytics"],
@@ -134,14 +137,14 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   },
   // CRM
   {
-    key: "hubspot", name: "HubSpot", category: "CRM", logo: "H", color: "#ff7a59", availability: "available",
+    key: "hubspot", name: "HubSpot", category: "CRM", logo: "H", color: "#ff7a59", availability: "coming_soon",
     description: "Two-way lead sync with HubSpot contacts.",
     fields: [tokenField("Private app token")],
     capabilities: ["contacts-sync"],
     test: (_c, cr) => probe("https://api.hubapi.com/crm/v3/objects/contacts?limit=1", { headers: { authorization: `Bearer ${cr.accessToken}` } }, "HubSpot token is valid"),
   },
   {
-    key: "salesforce", name: "Salesforce", category: "CRM", logo: "SF", color: "#00a1e0", availability: "available",
+    key: "salesforce", name: "Salesforce", category: "CRM", logo: "SF", color: "#00a1e0", availability: "coming_soon",
     description: "Push qualified leads to Salesforce.",
     fields: [{ key: "instanceUrl", label: "Instance URL", type: "url", required: true, placeholder: "https://yourorg.my.salesforce.com" }, tokenField()],
     capabilities: ["contacts-sync"],
@@ -149,20 +152,20 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   },
   // Advertising
   {
-    key: "google-ads", name: "Google Ads", category: "Advertising", logo: "G", color: "#4285f4", availability: "available",
+    key: "google-ads", name: "Google Ads", category: "Advertising", logo: "G", color: "#4285f4", availability: "coming_soon",
     description: "Import campaign spend, clicks and conversions.",
     fields: [{ key: "customerId", label: "Customer ID", type: "text", required: true }, { key: "developerToken", label: "Developer token", type: "password", required: true, secret: true }, tokenField("OAuth access token")],
     capabilities: ["analytics"],
   },
   {
-    key: "meta-ads", name: "Meta Ads", category: "Advertising", logo: "∞", color: "#0668e1", availability: "available",
+    key: "meta-ads", name: "Meta Ads", category: "Advertising", logo: "∞", color: "#0668e1", availability: "coming_soon",
     description: "Import Facebook & Instagram ad performance.",
     fields: [{ key: "adAccountId", label: "Ad account ID", type: "text", required: true, placeholder: "act_123" }, tokenField()],
     capabilities: ["analytics"],
     test: (c, cr) => probe(`https://graph.facebook.com/v19.0/${encodeURIComponent(c.adAccountId ?? "")}?fields=name`, { headers: { authorization: `Bearer ${cr.accessToken}` } }, "Meta Ads token is valid"),
   },
   {
-    key: "linkedin-ads", name: "LinkedIn Ads", category: "Advertising", logo: "in", color: "#0a66c2", availability: "available",
+    key: "linkedin-ads", name: "LinkedIn Ads", category: "Advertising", logo: "in", color: "#0a66c2", availability: "coming_soon",
     description: "Import LinkedIn campaign performance.",
     fields: [{ key: "accountId", label: "Ad account ID", type: "text", required: true }, tokenField()],
     capabilities: ["analytics"],

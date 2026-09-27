@@ -15,7 +15,9 @@ export async function listIntegrations(workspaceId: string) {
     openai: PROVIDERS.openai.isConfigured(),
     "google-ai": PROVIDERS.google.isConfigured(),
   };
-  return INTEGRATIONS.map(({ test, ...def }) => {
+  // Roadmap ("coming soon") entries are listed after everything that can be connected today.
+  const ordered = [...INTEGRATIONS].sort((a, b) => Number(a.availability === "coming_soon") - Number(b.availability === "coming_soon"));
+  return ordered.map(({ test, ...def }) => {
     const row = connected.find((c) => c.provider === def.key);
     return {
       ...def,
@@ -76,7 +78,7 @@ export async function testIntegration(ctx: WorkspaceContext, key: string) {
   const row = await db.integration.findUnique({ where: { workspaceId_provider: { workspaceId: ctx.workspace.id, provider: key } } });
   const def = getIntegration(key);
   if (!row || !def) throw notFound("Integration");
-  if (!def.test) return { ok: true, message: "Credentials saved. They will be verified on the next sync." };
+  if (!def.test) return { ok: true, message: "Credentials saved. They are used the next time this integration sends or syncs." };
   const creds = row.credentials ? (JSON.parse(decrypt(row.credentials)) as Record<string, string>) : {};
   const result = await def.test((row.config ?? {}) as Record<string, string>, creds);
   await db.integration.update({ where: { id: row.id }, data: { status: result.ok ? "CONNECTED" : "ERROR", error: result.ok ? null : result.message, lastSyncAt: new Date() } });

@@ -47,7 +47,6 @@ const schema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   MAX_UPLOAD_BYTES: z.coerce.number().int().positive().default(10 * 1024 * 1024),
 
-  SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 });
 

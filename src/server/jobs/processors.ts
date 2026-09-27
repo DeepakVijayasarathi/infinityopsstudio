@@ -56,8 +56,6 @@ export async function processJob<N extends QueueName>(queue: N, data: JobPayload
     case "tick":
       await schedulerTick();
       return;
-    case "digest":
-      return;
     default:
       logger.warn("Unknown job", { queue, data });
   }

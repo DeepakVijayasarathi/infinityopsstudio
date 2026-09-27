@@ -25,7 +25,7 @@ type Item = {
   fields: FieldDef[];
   capabilities: string[];
   docsUrl?: string;
-  availability: "available" | "admin";
+  availability: "available" | "admin" | "coming_soon";
   testable: boolean;
   connection: { id: string | null; status: "CONNECTED" | "ERROR" | "DISCONNECTED"; config: Record<string, string> | null; lastSyncAt: string | null; error: string | null } | null;
 };
@@ -120,7 +120,9 @@ export function IntegrationsView({ items, categories, canManage }: { items: Item
                 </p>
               )}
               <div className="mt-4 flex flex-wrap gap-2">
-                {i.availability === "admin" ? (
+                {i.availability === "coming_soon" ? (
+                  <Badge>Coming soon</Badge>
+                ) : i.availability === "admin" ? (
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <ShieldCheck className="size-4" /> {status === "CONNECTED" ? "Enabled by your platform administrator" : "Configured platform-wide by an administrator"}
                   </p>

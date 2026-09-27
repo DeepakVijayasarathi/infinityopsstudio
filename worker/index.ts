@@ -6,7 +6,7 @@ import { logger } from "../src/server/logger";
 import { systemLog } from "../src/server/system-log";
 import { db } from "../src/server/db";
 
-const CONCURRENCY: Record<QueueName, number> = { ai: 4, email: 2, social: 2, workflows: 4, analytics: 2, reports: 1, notifications: 2, scheduler: 1 };
+const CONCURRENCY: Record<QueueName, number> = { ai: 4, email: 2, social: 2, workflows: 4, analytics: 2, reports: 1, scheduler: 1 };
 
 async function main() {
   const connection = connectionOptions();
