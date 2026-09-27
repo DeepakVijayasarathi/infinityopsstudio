@@ -5,6 +5,9 @@
 
 ARG NODE_VERSION=22-bookworm-slim
 ARG NODE_VERSION_FULL=22-bookworm
+# Include the Claude Code CLI so AI can run on a Claude Pro/Max plan (see `bash manage.sh connect-claude`).
+# Build with --build-arg INSTALL_CLAUDE_CODE=0 for smaller images when using API keys only.
+ARG INSTALL_CLAUDE_CODE=1
 
 # OpenSSL 3 (CLI + libssl) for the Prisma engine, taken from the full image of the same Debian
 # release so the build needs no apt mirror access. Node itself bundles its CA store.
@@ -33,8 +36,17 @@ RUN --mount=type=secret,id=ca,required=false \
   if [ -s /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
   BUILD_STANDALONE=1 npm run build
 
+# ── Runtime base: optional Claude Code CLI ──
+FROM base AS runtime
+ARG INSTALL_CLAUDE_CODE
+RUN --mount=type=secret,id=ca,required=false \
+  if [ "$INSTALL_CLAUDE_CODE" = "1" ]; then \
+    if [ -s /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    npm install -g @anthropic-ai/claude-code --no-audit --no-fund && npm cache clean --force; \
+  fi
+
 # ── Worker / migrations / seed ──
-FROM base AS tools
+FROM runtime AS tools
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
@@ -42,11 +54,12 @@ COPY package.json package-lock.json tsconfig.json ./
 COPY prisma ./prisma
 COPY src ./src
 COPY worker ./worker
+COPY scripts ./scripts
 USER node
 CMD ["npx", "tsx", "worker/index.ts"]
 
 # ── Web (default target) ──
-FROM base AS web
+FROM runtime AS web
 ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 STORAGE_LOCAL_DIR=/app/storage
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static

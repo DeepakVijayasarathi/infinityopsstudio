@@ -108,7 +108,7 @@ async function* run(p: GenerateParams): AsyncGenerator<StreamChunk> {
       const status = result.api_error_status ?? undefined;
       const text = result.result ?? "Claude Code request failed";
       const retryable = status === 429 || (status !== undefined && status >= 500) || /rate limit|overloaded/i.test(text);
-      throw new ProviderError(/login|log in|authenticat/i.test(text) ? `${text} Run \`claude\` once on this machine and sign in.` : text, retryable, status);
+      throw new ProviderError(/login|log in|authenticat/i.test(text) ? `${text} On a Docker server run: bash manage.sh connect-claude — on your own computer run \`claude\` once and sign in.` : text, retryable, status);
     }
     if (result.stop_reason === "refusal") throw new ProviderError("The model declined this request. Try rephrasing the brief.", false, 400);
     const u = result.usage ?? {};
