@@ -83,7 +83,10 @@ TXT
       ok "Claude is connected. All AI features now use your Claude plan."
     else
       echo "$out" | tail -5
-      die "The test failed. Check the token (run claude setup-token again) and try: bash manage.sh connect-claude"
+      # Don't leave the app pointing at a Claude connection that doesn't work.
+      set_env AI_DEFAULT_PROVIDER local
+      docker compose up -d web worker >/dev/null
+      die "The test failed, so AI stays on the built-in demo engine. Create a new token with: claude setup-token — then run: bash manage.sh connect-claude"
     fi
     ;;
   disconnect-claude)

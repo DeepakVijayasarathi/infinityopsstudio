@@ -11,6 +11,21 @@ cd /opt/infinityops && sudo bash deploy.sh
 
 `deploy.sh` installs Docker when missing, pulls the latest code, creates `.env` on the first run (random `AUTH_SECRET`, `ENCRYPTION_KEY` and database password; existing secrets are never regenerated), sets `NODE_ENV=production` and `APP_URL`, runs `docker compose up -d --build`, and waits for `/api/ready`. Options: `APP_URL`, `WEB_PORT`, `SEED_DEMO=0`, `DOMAIN` (installs Caddy with automatic HTTPS) and `NO_BUILD=1`.
 
+## Managing a live server
+
+`manage.sh` (run in the project folder on the server) wraps admin commands for Docker deployments:
+
+| Command | What it does |
+|---|---|
+| `bash manage.sh make-admin you@company.com` | Creates your super-admin account and company workspace (Enterprise plan), or promotes an existing user. Prompts for name, company and password |
+| `bash manage.sh remove-demo` | Deletes the Northwind Growth demo workspace and demo users (refuses until another admin exists) and sets `SEED_DEMO=0` |
+| `bash manage.sh reset-password you@company.com` | Sets a new password, unlocks the account and signs out every session |
+| `bash manage.sh connect-claude` | Uses a Claude Pro/Max plan for all AI via the bundled Claude Code CLI and a `claude setup-token` token; verifies it and falls back to demo AI if the test fails |
+| `bash manage.sh disconnect-claude` | Switches back to the built-in demo AI |
+| `bash manage.sh status` | Lists users, workspaces, demo data and the active AI engine |
+
+Passwords are read interactively and passed to the container through the environment, never as command-line arguments. The images include Claude Code by default; build with `--build-arg INSTALL_CLAUDE_CODE=0` to leave it out.
+
 ## Docker Compose (single host)
 
 ```bash

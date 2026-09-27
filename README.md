@@ -94,6 +94,18 @@ cd /opt/infinityops && bash deploy.sh
 
 `deploy.sh` installs Docker if needed, creates `.env` with fresh secrets on the first run, builds and starts the stack, waits until it is healthy and prints the URL. Add `DOMAIN=app.example.com bash deploy.sh` to serve it over HTTPS with Caddy (point the domain's DNS at the server first). Run it again any time to update; data and secrets are kept.
 
+### Go live with your own business
+
+```bash
+cd /opt/infinityops
+bash manage.sh make-admin you@yourcompany.com   # your admin account + company workspace
+bash manage.sh remove-demo                      # delete the demo company and demo users
+bash manage.sh connect-claude                   # optional: AI on your Claude Pro/Max plan
+bash manage.sh status
+```
+
+`connect-claude` asks for a token from `claude setup-token` (run it on your own computer, signed in to your Claude account), stores it only in the server's `.env`, switches every AI feature to Claude and verifies the connection — if the test fails it stays on the built-in demo AI. The Docker images include the Claude Code CLI for this. Usage counts against your Claude plan's limits; for a public, multi-customer service use `ANTHROPIC_API_KEY` instead.
+
 ## Docker
 
 ```bash
