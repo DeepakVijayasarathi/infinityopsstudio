@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ZodError, type ZodType } from "zod";
+import { ZodError, type ZodType, type ZodTypeDef } from "zod";
 import { Prisma } from "@prisma/client";
 import { cookies } from "next/headers";
 import { AppError, forbidden, unauthenticated } from "./errors";
@@ -13,11 +13,15 @@ import type { Permission } from "@/config/permissions";
 
 type AuthMode = "public" | "user" | "workspace" | "admin";
 
+// Input type is `any` so B/Q are inferred from the schema's parsed *output* (defaults applied).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Schema<T> = ZodType<T, ZodTypeDef, any>;
+
 type RouteOptions<B, Q> = {
   auth?: AuthMode;
   permission?: Permission;
-  body?: ZodType<B>;
-  query?: ZodType<Q>;
+  body?: Schema<B>;
+  query?: Schema<Q>;
   /** Requests per window, keyed by user (or IP when anonymous). */
   rateLimit?: { limit: number; windowSec: number; key?: string };
   /** Allow a session that is still waiting for its second factor. */
