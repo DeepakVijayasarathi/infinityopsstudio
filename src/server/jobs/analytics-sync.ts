@@ -3,6 +3,7 @@ import { logger } from "../logger";
 import { emitEvent } from "../services/events";
 import { integrationCredentials } from "../services/integrations";
 import { alertOnAnomalies, weeklyDigest } from "../services/insights";
+import { websiteDay } from "../services/website";
 
 const startOfDay = (d = new Date()) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
@@ -34,7 +35,9 @@ export async function syncWorkspaceAnalytics(workspaceId: string) {
   const s = social._sum;
   await upsert("SOCIAL", { impressions: s.impressions ?? 0, reach: s.reach ?? 0, engagements: (s.likes ?? 0) + (s.comments ?? 0) + (s.shares ?? 0), clicks: s.clicks ?? 0 });
   await upsert("EMAIL", { impressions: emailSends, engagements: emailOpens, clicks: emailClicks });
-  await upsert("WEBSITE", { leads, conversions: wonLeads._count, revenueCents: wonLeads._sum.valueCents ?? 0 });
+  // Real website traffic from the tracking script (unique daily visitors and conversion events).
+  const site = await websiteDay(workspaceId, today);
+  await upsert("WEBSITE", { visits: site.visits, leads, conversions: wonLeads._count + site.conversions, revenueCents: wonLeads._sum.valueCents ?? 0 });
 
   // External providers
   const yt = await integrationCredentials(workspaceId, "youtube");

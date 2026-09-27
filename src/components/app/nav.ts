@@ -3,6 +3,10 @@ import {
   Bot,
   CreditCard,
   FileText,
+  Globe,
+  Inbox,
+  PanelsTopLeft,
+  Sparkles,
   LayoutDashboard,
   LayoutTemplate,
   Mail,
@@ -22,6 +26,8 @@ export type NavItem = { href: string; label: string; icon: LucideIcon; permissio
 
 export const NAV: NavItem[] = [
   { href: "/app", label: "Overview", icon: LayoutDashboard, section: "main" },
+  { href: "/app/agent", label: "AI Manager", icon: Sparkles, permission: "campaigns:read", section: "main" },
+  { href: "/app/inbox", label: "Inbox", icon: Inbox, permission: "leads:read", section: "main" },
   { href: "/app/workers", label: "AI Workers", icon: Bot, permission: "workers:read", section: "main" },
   { href: "/app/campaigns", label: "Campaigns", icon: Megaphone, permission: "campaigns:read", section: "main" },
   { href: "/app/content", label: "Content Studio", icon: FileText, permission: "content:read", section: "main" },
@@ -29,6 +35,8 @@ export const NAV: NavItem[] = [
   { href: "/app/social", label: "Social Media", icon: Share2, permission: "social:read", section: "grow" },
   { href: "/app/seo", label: "SEO", icon: Search, permission: "seo:read", section: "grow" },
   { href: "/app/email", label: "Email Marketing", icon: Mail, permission: "email:read", section: "grow" },
+  { href: "/app/website", label: "Website", icon: Globe, permission: "analytics:read", section: "grow" },
+  { href: "/app/pages", label: "Landing Pages", icon: PanelsTopLeft, permission: "content:read", section: "grow" },
   { href: "/app/leads", label: "Leads", icon: Users, permission: "leads:read", section: "grow" },
   { href: "/app/automations", label: "Automations", icon: Workflow, permission: "automations:read", section: "grow" },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3, permission: "analytics:read", section: "grow" },

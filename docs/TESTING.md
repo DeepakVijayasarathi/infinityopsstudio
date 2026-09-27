@@ -25,6 +25,7 @@ Pure logic with no I/O:
 - SEO page audit scoring and internal-link suggestions
 - AES-256-GCM encryption (fresh IV, tamper detection), hashing helpers, bcrypt, password policy, TOTP and recovery codes
 - AI model catalog, cost and credit calculation, pricing overrides; the local provider's routing, transforms, usage and streaming
+- Traffic-source classification, domain allow-list matching, inbound-email parsing, landing-page content schema and the AI Manager's proposal rules
 - Plan ordering and limits, role permission nesting, Stripe webhook signature verification (valid, forged, stale)
 
 ## Integration tests
@@ -39,6 +40,7 @@ Services and API route handlers run against a real PostgreSQL database with the 
 - **Automations**: a `LEAD_CREATED` workflow with a condition and a lead update runs for matching leads and stops for others.
 - **Copilot**: data answers (hot leads, approvals, performance), request → action planning, permission-filtered proposals, execution of approved actions with permission re-checks, capability matching.
 - **Autopilot, insights and templates**: a full draft campaign from one goal (strategy, tasks, blog, scheduled social drafts, email, disabled automation) and its streamed progress; hot-lead and anomaly insights, score explanations, the once-per-week digest; campaign, email and automation templates.
+- **Website, inbox, landing pages and AI Manager**: unique visitors, sources and conversions; domain allow-list; chat with AI replies becoming a lead and team replies reaching the visitor; inbound email (Postmark and SendGrid formats, retries ignored), AI-suggested replies and lead linking; WhatsApp verification and signature checks; cross-workspace isolation; landing page generate → edit → publish → view and lead attribution; AI Manager briefs, de-duplicated proposals, approval, dismissal, auto-drafts and the once-a-day schedule.
 - **API layer**: `401` shape for anonymous calls, `422` validation errors, workspace-scoped create and list, `403` for a foreign `x-workspace-id`, health endpoint.
 
 ### Setup
@@ -56,7 +58,7 @@ Before the run, `tests/global-setup.ts` applies migrations with `prisma migrate 
 Playwright drives Chromium through real user journeys against a production build:
 
 - `public.spec.ts` — marketing navigation, pricing, blog article, redirect of protected pages to login, health endpoints.
-- `journey.spec.ts` — one new customer, in order: sign up → create a campaign → generate and save content → assign a task to an AI worker → build an automation → ask Copilot and approve drafted posts → build a campaign with the AI autopilot → use a template and complete guided setup → open analytics → upgrade the plan (with invoice).
+- `journey.spec.ts` — one new customer, in order: sign up → create a campaign → generate and save content → assign a task to an AI worker → build an automation → ask Copilot and approve drafted posts → build a campaign with the AI autopilot → use a template and complete guided setup → generate and publish an AI landing page, submit its form and chat as a visitor, then reply from the inbox → run the AI Manager and approve a suggestion → open analytics → upgrade the plan (with invoice).
 
 ```bash
 npm run build

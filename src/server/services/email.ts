@@ -202,7 +202,7 @@ export function renderCampaignEmail(opts: { subject: string; body: string; previ
   return { html: full, text, subject: applyMergeTags(opts.subject, opts.lead), unsubscribe };
 }
 
-async function providerFor(workspaceId: string): Promise<EmailProvider> {
+export async function providerFor(workspaceId: string): Promise<EmailProvider> {
   const smtp = await integrationCredentials(workspaceId, "smtp");
   return smtp ? smtpFromCredentials(smtp.config, smtp.credentials) : emailProvider();
 }

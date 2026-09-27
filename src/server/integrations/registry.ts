@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 
-export type IntegrationCategory = "Social Media" | "Email" | "Analytics" | "CRM" | "Advertising" | "AI providers" | "Webhooks";
+export type IntegrationCategory = "Social Media" | "Messaging" | "Email" | "Analytics" | "CRM" | "Advertising" | "AI providers" | "Webhooks";
 
 export type IntegrationField = {
   key: string;
@@ -98,6 +98,19 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
     test: (_c, cr) => probe("https://open.tiktokapis.com/v2/user/info/?fields=display_name", { headers: { authorization: `Bearer ${cr.accessToken}` } }, "TikTok token is valid"),
   },
   // Email
+  {
+    key: "whatsapp", name: "WhatsApp Business", category: "Messaging", logo: "WA", color: "#25d366", availability: "available",
+    description: "Receive and reply to WhatsApp messages in the Inbox (WhatsApp Cloud API). Webhook details are on the Inbox page.",
+    fields: [
+      { key: "phoneNumberId", label: "Phone number ID", type: "text", required: true, help: "Meta Business → WhatsApp → API setup." },
+      tokenField("Permanent access token", "System-user token with whatsapp_business_messaging."),
+      { key: "appSecret", label: "App secret", type: "password", required: true, secret: true, help: "Used to verify that webhooks really come from Meta." },
+      { key: "verifyToken", label: "Webhook verify token", type: "text", required: true, placeholder: "any-long-random-text", help: "Enter the same value in Meta's webhook settings." },
+    ],
+    capabilities: ["messaging"],
+    docsUrl: "https://developers.facebook.com/docs/whatsapp/cloud-api/get-started",
+    test: (c, cr) => probe(`https://graph.facebook.com/v19.0/${encodeURIComponent(c.phoneNumberId ?? "")}?fields=display_phone_number`, { headers: { authorization: `Bearer ${cr.accessToken}` } }, "WhatsApp number is reachable"),
+  },
   {
     key: "smtp", name: "SMTP", category: "Email", logo: "@", color: "#475569", availability: "available",
     description: "Send campaigns through your own SMTP server or provider (SES, Postmark, SendGrid SMTP).",

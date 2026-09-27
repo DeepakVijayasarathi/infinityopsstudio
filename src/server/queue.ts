@@ -11,7 +11,7 @@ export type JobPayloads = {
   social: { kind: "publish-post"; postId: string };
   workflows: { kind: "run-execution"; executionId: string };
   analytics: { kind: "sync-workspace"; workspaceId: string };
-  reports: { kind: "campaign-report"; campaignId: string; workspaceId: string };
+  reports: { kind: "campaign-report"; campaignId: string; workspaceId: string } | { kind: "agent-run"; workspaceId: string };
   scheduler: { kind: "tick" };
 };
 

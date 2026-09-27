@@ -81,10 +81,10 @@ tests/               unit/, integration/, e2e/
 | `social` | Publish scheduled social posts |
 | `workflows` | Run or resume automation executions |
 | `analytics` | Roll up first-party metrics per workspace, sync YouTube subscribers, fire low-engagement triggers |
-| `reports` | Generate campaign performance reports |
+| `reports` | Generate campaign performance reports; daily AI Manager runs |
 | `scheduler` | The 60-second tick |
 
-The worker (`npm run worker`) registers a repeatable `tick` job every 60 seconds. Each tick enqueues due social posts, scheduled email campaigns and sequence steps, scheduled workflows and resumed delays, rolls billing periods over (applying scheduled downgrades), triggers the hourly analytics rollup and deletes expired sessions and tokens. Because the tick is a single repeatable job, running several worker replicas does not duplicate it.
+The worker (`npm run worker`) registers a repeatable `tick` job every 60 seconds. Each tick enqueues due social posts, scheduled email campaigns and sequence steps, scheduled workflows and resumed delays, rolls billing periods over (applying scheduled downgrades), triggers the hourly analytics rollup, queues each workspace's daily AI Manager run (once per UTC day, from its configured hour) and deletes expired sessions and tokens. Because the tick is a single repeatable job, running several worker replicas does not duplicate it.
 
 ## Domain events and automations
 
@@ -96,6 +96,13 @@ Services emit domain events (`emitEvent`) such as `LEAD_CREATED`, `LEAD_STATUS_C
 - **Campaign autopilot** (`services/autopilot.ts`): an async generator that creates the campaign, then strategy and tasks, blog post, per-platform social drafts spread over the campaign dates, an email draft and a disabled follow-up automation. `POST /campaigns/autopilot` streams each step over SSE; failures in one step don't stop the others, and nothing is published or sent.
 - **Insights** (`services/insights.ts`): rule-based signals from `MetricDaily` (3-day vs 14-day anomaly test, week-over-week change), leads, campaigns, approvals, social and email. The hourly analytics job sends each anomaly alert at most once a day and writes one AI weekly digest per ISO week.
 - **Templates** (`config/templates.ts`) and **Brand autofill** (`services/brand-autofill.ts`, SSRF-safe fetch of the user's site, deterministic metadata extraction plus optional AI inference with a real model).
+
+## Growth: website, inbox, landing pages and the AI Manager
+
+- **Website widget** (`services/website.ts`, `server/widget-script.ts` served at `/widget.js`): a dependency-free script that records pageviews (including SPA navigation), binds `form[data-infinityops]` to lead capture and renders the chat in a shadow DOM using `textContent` only. Visitors are counted with a daily-rotating salted hash of IP and user agent — no cookies, no raw IPs stored. Public endpoints live under `/api/public/*`, where the middleware sets open CORS, strips cookies and skips the CSRF check; each checks the key, the optional domain allow-list and a per-IP rate limit. The hourly rollup adds website visits and conversions to `MetricDaily`.
+- **Inbox** (`services/inbox.ts`): one `Conversation` per contact and channel. Website chat gets AI replies (from the Brand Kit) until a person turns them off; WhatsApp and email conversations start with AI off. Inbound WhatsApp is verified with HMAC-SHA256 of the raw body; inbound email is normalised across providers and de-duplicated by message ID. Replies go out on the same channel (WhatsApp Graph API or the workspace's email provider); a failed delivery is stored with its error.
+- **Landing pages** (`services/landing-pages.ts`, `app/p/[slug]`): content is a zod-validated section schema, not HTML, so pages always render safely and each field is editable. A real model writes the JSON; the demo provider fills a template from the Brand Kit. Pages embed the widget with `data-page`, so views and form leads are attributed to the page.
+- **AI Manager** (`services/agent.ts`): gathers insights, inbox, leads and content gaps, turns them into rule-based proposals (Copilot actions), and with a real model adds a written brief and up to two extra draft ideas. Proposals are de-duplicated against pending ones, approved through `copilotExecute` with the approver's permissions, and claimed atomically so a double click can't run twice. `autoDrafts` pre-runs up to three draft-only actions as the workspace owner.
 
 ## AI
 

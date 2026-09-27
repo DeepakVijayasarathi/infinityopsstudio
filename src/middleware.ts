@@ -25,7 +25,10 @@ function isHttps(req: NextRequest): boolean {
   return proto === "https";
 }
 // Server-to-server endpoints authenticated by signatures/tokens instead of cookies.
-const CSRF_EXEMPT = ["/api/v1/billing/webhooks/", "/api/v1/hooks/", "/api/v1/email/track/", "/api/v1/email/unsubscribe/"];
+const CSRF_EXEMPT = ["/api/v1/billing/webhooks/", "/api/v1/hooks/", "/api/v1/email/track/", "/api/v1/email/unsubscribe/", "/api/public/"];
+// Called from customers' own websites: open CORS, never with cookies (credentials are not allowed).
+const PUBLIC_API = "/api/public/";
+const PUBLIC_CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "GET,POST,OPTIONS", "access-control-allow-headers": "content-type", "access-control-max-age": "86400" };
 
 function allowedOrigins(req: NextRequest): Set<string> {
   const set = new Set<string>([req.nextUrl.origin]);
@@ -47,6 +50,17 @@ function sameHost(req: NextRequest, origin: string): boolean {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID();
+
+  if (pathname.startsWith(PUBLIC_API)) {
+    if (req.method === "OPTIONS") return new NextResponse(null, { status: 204, headers: PUBLIC_CORS });
+    const headers = new Headers(req.headers);
+    headers.set("x-request-id", requestId);
+    headers.delete("cookie"); // public endpoints must never act on a signed-in session
+    const res = NextResponse.next({ request: { headers } });
+    for (const [k, v] of Object.entries(PUBLIC_CORS)) res.headers.set(k, v);
+    res.headers.set("x-request-id", requestId);
+    return res;
+  }
 
   // CSRF defence-in-depth (cookies are SameSite=Lax): state-changing API calls must come from our origin.
   if (pathname.startsWith("/api/") && !SAFE_METHODS.has(req.method) && !CSRF_EXEMPT.some((p) => pathname.startsWith(p))) {

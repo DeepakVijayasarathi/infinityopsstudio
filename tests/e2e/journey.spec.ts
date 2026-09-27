@@ -106,6 +106,49 @@ test("templates and guided setup", async () => {
   await expect(page.getByText("You're all set")).toBeVisible();
 });
 
+test("AI landing page captures a lead and website chat reaches the inbox", async () => {
+  await page.goto("/app/pages");
+  await page.getByRole("button", { name: "New page" }).click();
+  await page.getByLabel("What are you offering?").fill("Free coffee tasting for office teams");
+  await page.getByRole("button", { name: "Generate page" }).click();
+  await page.waitForURL(/\/app\/pages\/[a-z0-9]+$/);
+  await page.getByRole("button", { name: "Publish" }).click();
+  await expect(page.getByText("Live", { exact: true })).toBeVisible();
+  const url = await page.getByLabel("Public URL").inputValue();
+
+  const visitor = await page.context().browser()!.newPage();
+  await visitor.goto(url);
+  await expect(visitor.getByRole("heading", { level: 1 })).toContainText("coffee tasting");
+  await visitor.getByLabel("Your name").fill("Sam Visitor");
+  await visitor.getByLabel("Work email").fill(`sam.${stamp}@office.example`);
+  await visitor.getByRole("button", { name: /Get started|Start free|Book a demo/ }).last().click();
+  await expect(visitor.getByRole("status")).toBeVisible();
+
+  await visitor.getByRole("button", { name: "Chat with us" }).click();
+  await visitor.getByLabel("Message").fill("Do you deliver on Saturdays?");
+  await visitor.getByLabel("Message").press("Enter");
+  await expect(visitor.getByText("Do you deliver on Saturdays?")).toBeVisible();
+  await visitor.close();
+
+  await page.goto("/app/leads");
+  await expect(page.getByText("Sam Visitor").first()).toBeVisible();
+  await page.goto("/app/inbox");
+  await page.getByRole("button", { name: /Sam Visitor/ }).click();
+  await expect(page.getByText("Do you deliver on Saturdays?")).toBeVisible();
+  await page.getByLabel("Reply", { exact: true }).fill("Yes, every Saturday until noon.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByText("Yes, every Saturday until noon.")).toBeVisible();
+});
+
+test("AI Manager writes a brief and runs an approved action", async () => {
+  await page.goto("/app/agent");
+  await page.getByRole("button", { name: "Run now" }).click();
+  await expect(page.getByText("Good morning", { exact: false })).toBeVisible({ timeout: 30_000 });
+  const approve = page.getByRole("button", { name: "Approve" }).first();
+  await approve.click();
+  await expect(page.getByRole("heading", { name: "Recently handled" })).toBeVisible({ timeout: 60_000 });
+});
+
 test("view analytics", async () => {
   await page.goto("/app/analytics");
   await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();

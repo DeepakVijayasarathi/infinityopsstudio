@@ -174,6 +174,43 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | POST | `/api/v1/copilot` | workspace member |
 | POST | `/api/v1/copilot/execute` | per action (checked on execution) |
 
+### AI Manager
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/v1/agent` | `campaigns:read` — config, latest brief, pending and recent suggestions, run history |
+| PUT | `/api/v1/agent` | `campaigns:write` — `enabled`, `runHourUtc`, `autoDrafts`, `focus` |
+| POST | `/api/v1/agent/run` | `campaigns:write` — run the review now |
+| POST | `/api/v1/agent/proposals/:id` | `content:write` + the action's own permission — `{ "decision": "approve" \| "dismiss" }` |
+
+### Website
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/v1/website?days=30` | `analytics:read` — widget settings and visitor stats |
+| PUT | `/api/v1/website` | `integrations:manage` — chat, AI replies, greeting, colour, position, allowed domains |
+
+### Inbox
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/v1/inbox?status=OPEN&channel=WEBSITE&q=` | `leads:read` |
+| GET, PATCH | `/api/v1/inbox/:id` | `leads:read` / `leads:write` (`status`, `aiEnabled`) |
+| POST | `/api/v1/inbox/:id/reply` | `leads:write` — delivered on the conversation's channel |
+| POST | `/api/v1/inbox/:id/suggest` | `leads:write` — AI draft, not sent |
+| POST | `/api/v1/inbox/:id/lead` | `leads:write` — link or create the lead |
+
+### Landing pages
+
+| Method | Path | Access |
+|---|---|---|
+| GET, POST | `/api/v1/pages` | `content:read` / `content:write` (POST generates a draft from `offer`, `audience`, `goal`) |
+| GET, PATCH, DELETE | `/api/v1/pages/:id` | `content:read` / `content:write` |
+| POST | `/api/v1/pages/:id/publish` | `content:approve` — `{ "publish": true }` |
+| POST | `/api/v1/pages/:id/regenerate` | `content:write` — `{ "section": "hero" }` |
+
+Published pages are served at `/p/:slug`; members can preview drafts with `?preview=1`.
+
 ### Campaigns
 
 | Method | Path | Access |
@@ -371,6 +408,20 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | Method | Path | Access |
 |---|---|---|
 | POST | `/api/v1/contact` | public |
+
+### Public widget and channel webhooks
+
+Served with `Access-Control-Allow-Origin: *`, no cookies, and rate-limited per IP. The widget key (`pk_…`) is public by design; restrict it with **allowed domains** on the Website page.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/widget.js` | The embeddable script |
+| GET | `/api/public/widget/:key` | Chat widget configuration |
+| POST | `/api/public/track/:key` | Pageview or conversion (`type`, `url`, `referrer`, `utmSource`, `landingPageId`) |
+| POST | `/api/public/lead/:key` | Form → lead (hidden `website` field is a honeypot) |
+| GET, POST | `/api/public/chat/:key` | Poll / send website chat messages (`visitorId`) |
+| GET, POST | `/api/public/whatsapp/:key` | WhatsApp Cloud API webhook: `hub.challenge` verification, and messages signed with `X-Hub-Signature-256` (your app secret) |
+| POST | `/api/public/email/:token` | Inbound email (Postmark, SendGrid Inbound Parse, Mailgun or JSON `{from, subject, text}`); the secret token is shown on the Inbox page |
 
 ### Platform admin
 

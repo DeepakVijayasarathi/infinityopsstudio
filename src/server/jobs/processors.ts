@@ -10,6 +10,7 @@ import { processSendCampaign, processScheduledEmail } from "../services/email";
 import { processCampaignReport } from "../services/reports";
 import { processBillingPeriods } from "../billing/service";
 import { syncWorkspaceAnalytics } from "./analytics-sync";
+import { runAgent, runDueAgents } from "../services/agent";
 
 let lastAnalyticsSync = 0;
 
@@ -21,6 +22,7 @@ export async function schedulerTick() {
     workflows: await processScheduledWorkflows(),
     billing: await processBillingPeriods(),
     analytics: 0,
+    agents: await runDueAgents(),
   };
   // Hourly first-party analytics rollup.
   if (Date.now() - lastAnalyticsSync > 60 * 60_000) {
@@ -53,6 +55,9 @@ export async function processJob<N extends QueueName>(queue: N, data: JobPayload
       return syncWorkspaceAnalytics(payload.workspaceId);
     case "campaign-report":
       return processCampaignReport(payload.workspaceId, payload.campaignId);
+    case "agent-run":
+      await runAgent(payload.workspaceId, "schedule");
+      return;
     case "tick":
       await schedulerTick();
       return;

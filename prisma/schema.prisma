@@ -58,6 +58,7 @@ model User {
   ownedLeads         Lead[]              @relation("LeadOwner")
   aiRequests         AIRequest[]
   conversations      AIConversation[]
+  inboxMessages      Message[]
 
   @@index([createdAt])
 }
@@ -159,6 +160,14 @@ model Workspace {
   auditLogs      AuditLog[]
   metrics        MetricDaily[]
   files          File[]
+  websiteWidget  WebsiteWidget?
+  siteEvents     SiteEvent[]
+  inbox          Conversation[]   @relation("InboxConversations")
+  messages       Message[]
+  landingPages   LandingPage[]
+  agentConfig    AgentConfig?
+  agentRuns      AgentRun[]
+  agentProposals AgentProposal[]
 }
 
 model Role {
@@ -505,6 +514,7 @@ model Campaign {
   emailCampaigns EmailCampaign[]
   leads          Lead[]
   metrics        MetricDaily[]
+  landingPages   LandingPage[]
 
   @@index([workspaceId, status])
   @@index([workspaceId, createdAt])
@@ -882,6 +892,7 @@ model Lead {
   activities      LeadActivity[]
   tasks           LeadTask[]
   emailSends      EmailSend[]
+  inboxThreads    Conversation[]
 
   @@unique([workspaceId, email])
   @@index([workspaceId, status])
@@ -1239,4 +1250,212 @@ model ContactSubmission {
   createdAt DateTime    @default(now())
 
   @@index([createdAt])
+}
+
+// ─── Website widget, tracking & inbox ───
+
+enum SiteEventType {
+  PAGEVIEW
+  CONVERSION
+}
+
+// One per workspace: the public key used by the website script, chat widget and forms.
+model WebsiteWidget {
+  id                String    @id @default(cuid())
+  workspaceId       String    @unique
+  publicKey         String    @unique
+  enabled           Boolean   @default(true)
+  chatEnabled       Boolean   @default(true)
+  aiReplies         Boolean   @default(true)
+  greeting          String    @default("Hi! 👋 How can we help you today?")
+  accentColor       String    @default("#1f5cf5")
+  position          String    @default("right")
+  askEmailAfter     Int       @default(2)
+  allowedDomains    String[]
+  // Secret used in the inbound email webhook URL.
+  inboundEmailToken String    @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+// Privacy-friendly page view / conversion events (no cookies; visitor hash rotates daily).
+model SiteEvent {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  type          SiteEventType
+  day           DateTime      @db.Date
+  path          String
+  referrer      String?
+  source        String?
+  campaign      String?
+  visitorHash   String
+  landingPageId String?
+  createdAt     DateTime      @default(now())
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, day])
+  @@index([workspaceId, type, day])
+}
+
+enum ConversationChannel {
+  WEBSITE
+  WHATSAPP
+  EMAIL
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum MessageDirection {
+  IN
+  OUT
+}
+
+enum MessageAuthor {
+  CONTACT
+  AI
+  AGENT
+  SYSTEM
+}
+
+model Conversation {
+  id            String              @id @default(cuid())
+  workspaceId   String
+  channel       ConversationChannel
+  // Visitor id (website), phone number (WhatsApp) or email address (email).
+  externalId    String
+  contactName   String?
+  contactHandle String?
+  subject       String?
+  leadId        String?
+  status        ConversationStatus  @default(OPEN)
+  aiEnabled     Boolean             @default(true)
+  unread        Int                 @default(0)
+  lastMessageAt DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  workspace     Workspace           @relation("InboxConversations", fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead          Lead?               @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  messages      Message[]
+
+  @@unique([workspaceId, channel, externalId])
+  @@index([workspaceId, status, lastMessageAt])
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  conversationId String
+  workspaceId    String
+  direction      MessageDirection
+  author         MessageAuthor
+  body           String
+  userId         String?
+  externalId     String?
+  failed         Boolean          @default(false)
+  error          String?
+  createdAt      DateTime         @default(now())
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user           User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+}
+
+// ─── Landing pages ───
+
+enum LandingPageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model LandingPage {
+  id             String            @id @default(cuid())
+  workspaceId    String
+  campaignId     String?
+  slug           String            @unique
+  title          String
+  offer          String?
+  status         LandingPageStatus @default(DRAFT)
+  // Section content: hero, benefits, proof, faq, form, closing.
+  content        Json
+  accentColor    String            @default("#1f5cf5")
+  seoTitle       String?
+  seoDescription String?
+  views          Int               @default(0)
+  conversions    Int               @default(0)
+  publishedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaign       Campaign?         @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+}
+
+// ─── AI Manager (daily agent) ───
+
+enum AgentRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ProposalStatus {
+  PENDING
+  DISMISSED
+  DONE
+  FAILED
+}
+
+model AgentConfig {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  enabled     Boolean   @default(false)
+  // Hour of day (UTC) for the daily run; 3 = 08:30 IST.
+  runHourUtc  Int       @default(3)
+  // Execute draft-only actions automatically (nothing is ever published or sent).
+  autoDrafts  Boolean   @default(false)
+  focus       String?
+  lastRunAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model AgentRun {
+  id          String          @id @default(cuid())
+  workspaceId String
+  status      AgentRunStatus  @default(RUNNING)
+  trigger     String
+  summary     String?
+  error       String?
+  startedAt   DateTime        @default(now())
+  finishedAt  DateTime?
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  proposals   AgentProposal[]
+
+  @@index([workspaceId, startedAt])
+}
+
+model AgentProposal {
+  id            String         @id @default(cuid())
+  runId         String
+  workspaceId   String
+  title         String
+  description   String
+  reason        String?
+  action        Json
+  status        ProposalStatus @default(PENDING)
+  resultMessage String?
+  resultHref    String?
+  decidedById   String?
+  decidedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  run           AgentRun       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status])
 }

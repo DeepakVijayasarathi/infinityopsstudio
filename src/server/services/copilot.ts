@@ -59,7 +59,7 @@ const WORKER_ALIASES: Record<string, string> = Object.fromEntries(WORKER_TEMPLAT
 
 // ─── Describing actions ───
 
-function describe(a: CopilotAction): { title: string; description: string } {
+export function describe(a: CopilotAction): { title: string; description: string } {
   switch (a.type) {
     case "launch_ai_campaign":
       return { title: "Build a full campaign with AI", description: `Strategy, tasks, content, social drafts, email and automation for: “${a.goal}”` };

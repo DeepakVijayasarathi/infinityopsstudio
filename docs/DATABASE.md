@@ -57,6 +57,11 @@ PostgreSQL 16, accessed through Prisma 6. The schema lives in `prisma/schema.pri
 | `Workflow` / `WorkflowNode` / `WorkflowExecution` | Automations: trigger and filters, ordered steps with JSON config, executions with status, current step, resume time and logs |
 | `BrandKit` | One per workspace: voice and attributes, audience, products, USPs, competitors, do's and don'ts, guidelines, logo and brand colours |
 | `Integration` | Connected provider per workspace: config, encrypted credentials, status, last check |
+| `WebsiteWidget` | One per workspace: public key, chat and AI-reply switches, greeting, colour, position, allowed domains, secret inbound-email token |
+| `SiteEvent` | Pageviews and conversions from the widget: day, path, referrer, source, UTM campaign, hashed visitor, landing page |
+| `Conversation` / `Message` | Inbox threads per channel (website, WhatsApp, email) and contact, linked lead, status, unread count, AI switch; messages with direction, author (contact, AI, agent, system) and delivery errors |
+| `LandingPage` | Hosted page: unique slug, offer, section content (JSON), status, accent colour, SEO fields, views and conversions, optional campaign |
+| `AgentConfig` / `AgentRun` / `AgentProposal` | AI Manager settings; each daily or manual run with its brief; suggested actions with their Copilot action, status and result |
 | `MetricDaily` | Daily metrics per workspace, channel and optionally campaign (impressions, reach, visits, clicks, engagements, leads, conversions, revenue, spend) |
 
 ### Platform

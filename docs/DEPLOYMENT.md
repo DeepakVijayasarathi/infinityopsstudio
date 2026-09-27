@@ -26,6 +26,12 @@ cd /opt/infinityops && sudo bash deploy.sh
 
 Passwords are read interactively and passed to the container through the environment, never as command-line arguments. The images include Claude Code by default; build with `--build-arg INSTALL_CLAUDE_CODE=0` to leave it out.
 
+## Connecting your website, WhatsApp and email
+
+- **Website**: open **Website → Install** in the app and paste the snippet before `</body>` on your site. Add your domain under **Chat & forms → Allowed domains** so nobody else can use your key.
+- **WhatsApp**: in Meta for Developers create a WhatsApp Business app, then in **Integrations → WhatsApp Business** enter the phone number ID, a permanent access token, the app secret and a verify token of your choice. Paste the webhook URL shown on the **Inbox** page (⚙) into the Meta app's webhook settings with the same verify token and subscribe to `messages`. Meta requires an `https://` URL, so set `DOMAIN` (or put the app behind your own TLS proxy).
+- **Email**: point your provider's inbound route (Postmark, SendGrid Inbound Parse or Mailgun) at the inbound URL shown on the Inbox page. Replies are sent through the workspace SMTP integration or the platform SMTP settings.
+
 ## Docker Compose (single host)
 
 ```bash

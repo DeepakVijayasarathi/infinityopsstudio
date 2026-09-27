@@ -16,6 +16,8 @@ export const NOTIFICATION_TYPES = {
   "workspace.invite": { label: "Workspace membership", emailDefault: true },
   "insight.alert": { label: "Performance alerts (unusual drops)", emailDefault: true },
   "report.weekly": { label: "Weekly insights report", emailDefault: false },
+  "inbox.message": { label: "New inbox conversation", emailDefault: true },
+  "agent.brief": { label: "AI Manager morning brief", emailDefault: true },
 } as const;
 
 export type NotificationType = keyof typeof NOTIFICATION_TYPES;

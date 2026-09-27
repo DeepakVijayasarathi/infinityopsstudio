@@ -148,7 +148,30 @@ function document(b: Brief): string {
   return `## ${cap(s)}: strategy\n\n### Objective\nDrive measurable growth for ${b.brand} by focusing on ${s.toLowerCase()} over the next 90 days.\n\n### Audience\n${cap(b.audience)} who are short on time and need reliable results. Their top priorities: efficiency, predictability and proof of ROI.\n\n### Core message\n*${b.brand} helps you get more done with less effort — without compromising on quality.*\n\n### Channel mix\n| Channel | Role | Share of effort |\n|---|---|---|\n| SEO & blog | Compounding demand capture | 30% |\n| LinkedIn & social | Awareness and trust | 25% |\n| Email | Nurture and conversion | 20% |\n| Paid ads | Acceleration and retargeting | 15% |\n| Partnerships | Credibility and reach | 10% |\n\n### 90-day roadmap\n- **Month 1 — Foundation:** finalize positioning, launch core landing page, set up tracking.\n- **Month 2 — Acceleration:** publish weekly content, launch nurture sequence, start retargeting.\n- **Month 3 — Optimization:** double down on top channels, run conversion experiments, report ROI.\n\n### KPIs\n- Qualified leads per month\n- Conversion rate from visit to lead\n- Cost per acquisition\n- Pipeline influenced\n\n### Risks & mitigations\n- **Limited bandwidth** → use AI workers and templates to keep output consistent.\n- **Slow SEO ramp** → balance with paid and partnerships early.`;
 }
 
+/** Short, human replies for website chat and inbox suggestions (system prompt contains "[chat-assistant]"). */
+function chatReply(p: GenerateParams): string {
+  const sys = p.system ?? "";
+  const field = (re: RegExp) => sys.match(re)?.[1]?.trim() ?? "";
+  const company = field(/Company:\s*([^\n]+)/i) || "our team";
+  const tagline = field(/Tagline:\s*([^\n]+)/i);
+  const products = field(/Products\/services:\s*([^\n]+)/i);
+  const last = [...p.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const m = last.toLowerCase();
+  const email = last.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)?.[0];
+  const knownEmail = /visitor email:\s*\S+@/i.test(sys) || !!email;
+  const name = field(/Visitor name:\s*([^\n]+)/i).split(" ")[0];
+  const ask = knownEmail ? "" : " What's the best email to reach you? Our team will follow up with details.";
+  if (email) return `Thanks${name ? `, ${name}` : ""}! We've got your details (${email}) — someone from ${company} will be in touch shortly. Anything else I can help with meanwhile?`;
+  if (/^(hi|hello|hey|namaste|good (morning|afternoon|evening))\b/.test(m)) return `Hi${name ? ` ${name}` : ""}! 👋 Welcome to ${company}.${tagline ? ` ${tagline}.` : ""} How can I help you today?`;
+  if (/price|pricing|cost|quote|how much|plans?\b/.test(m)) return `Great question — pricing depends on what you need, so we'll share options that fit you.${ask || " Our team will send those over shortly."}`;
+  if (/demo|call|meeting|book|appointment|talk to|speak/.test(m)) return `We'd love to show you around!${ask || " Our team will reach out to schedule a time that suits you."}`;
+  if (/what (do|does) you|who are you|about|services?|products?|offer/.test(m)) return `${company}${tagline ? ` — ${tagline.charAt(0).toLowerCase()}${tagline.slice(1)}` : ""}.${products ? ` We help with ${products.split(/[\n.]/)[0]!.slice(0, 160)}.` : ""} Is there something specific you're looking for?`;
+  if (/thank|thanks|great|awesome|ok\b|okay/.test(m)) return "You're welcome! Is there anything else I can help you with?";
+  return `Thanks for your message! I'll make sure the ${company} team sees it.${ask}`;
+}
+
 function respond(p: GenerateParams): string {
+  if ((p.system ?? "").includes("[chat-assistant]")) return chatReply(p);
   const brief = extract(p);
   return transform(brief) ?? document(brief);
 }
