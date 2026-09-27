@@ -30,11 +30,14 @@ interface AIProvider {
 | Anthropic | Official `@anthropic-ai/sdk` (Messages API, streaming) | `ANTHROPIC_API_KEY` |
 | OpenAI | Chat Completions over `fetch` with SSE parsing | `OPENAI_API_KEY` |
 | Google | Gemini `generateContent` / `streamGenerateContent` over `fetch` | `GOOGLE_AI_API_KEY` |
+| Claude Code (local) | Spawns the signed-in Claude Code CLI (`claude -p --output-format stream-json`) | none — uses the CLI's Claude login |
 | Local | Deterministic offline template engine | none |
 
 Provider errors are normalised to `ProviderError { retryable, status }`: rate limits, timeouts, connection failures and 5xx are retryable; authentication errors, bad requests and refusals are not.
 
 **Anthropic specifics.** Opus 5 and Sonnet 5 manage sampling themselves, so `temperature` is omitted for them (`noSampling` in the catalog). Requests to Opus-tier models opt into server-side fallbacks (`fallbacks: "default"` with the `server-side-fallback-2026-07-01` beta), so a request declined by a safety classifier is re-run on a suitable model instead of failing the task. A final `stop_reason: "refusal"` is surfaced as a clear, non-retryable error ("The model declined this request…").
+
+**Claude Code (local)** (`providers/claude-code.ts`) lets the app use a Claude subscription instead of an API key. Each request starts `claude -p` in a scratch directory with `--tools ""` (text only), `--no-session-persistence`, `--strict-mcp-config`, the mapped model (`opus`, `sonnet`, `haiku`) and the request's system prompt; the prompt (earlier chat turns replayed as a transcript) goes in on stdin. Text deltas from the `stream-json` output are streamed to the app, and the final `result` line supplies token usage, errors and refusals. `ANTHROPIC_API_KEY` is removed from the child's environment so it always uses the signed-in account. It is opt-in (`AI_DEFAULT_PROVIDER=claude-code` or `CLAUDE_CODE_ENABLED=1`), only reports as configured when the CLI is found, and at most `CLAUDE_CODE_MAX_CONCURRENCY` processes run at once. Costs record as $0 because usage is billed to the Claude plan; tokens and credits are still tracked. It suits a single machine (developer laptop, self-hosted box); the Docker images don't include the CLI.
 
 **The local provider** makes every feature usable without API keys (development, CI, demos). It reads the brief and the Brand Kit context and returns structured marketing output — strategies, blog posts, social posts, ad variations, keyword tables, analyses — and applies inline transforms (summarise, shorten, expand, rewrite) to the given text. It is labelled *Infinity Local (demo)* in model pickers and is never chosen when a real provider is configured and selected.
 
@@ -47,6 +50,7 @@ Provider errors are normalised to `ProviderError { retryable, status }`: rate li
 | `claude-opus-5` | Anthropic | 5.00 | 25.00 |
 | `claude-sonnet-5` | Anthropic | 2.00 | 10.00 |
 | `claude-haiku-4-5` | Anthropic | 1.00 | 5.00 |
+| `claude-code-opus` / `-sonnet` / `-haiku` | Claude Code (local) | — (Claude plan) | — |
 | `gpt-4.1` | OpenAI | 2.00 | 8.00 |
 | `gpt-4.1-mini` | OpenAI | 0.40 | 1.60 |
 | `gemini-2.5-pro` | Google | 1.25 | 10.00 |

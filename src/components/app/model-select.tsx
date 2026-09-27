@@ -16,7 +16,7 @@ export function ModelSelect({ value, onChange, id = "model", className, allowDef
       {usable.map((m) => (
         <option key={m.id} value={m.id}>
           {m.label}
-          {m.provider === "local" ? " — no API key needed" : ""}
+          {m.provider === "local" ? " — no API key needed" : m.provider === "claude-code" ? " — uses your Claude login" : ""}
         </option>
       ))}
     </Select>

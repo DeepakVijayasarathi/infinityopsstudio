@@ -14,6 +14,7 @@ export async function listIntegrations(workspaceId: string) {
     anthropic: PROVIDERS.anthropic.isConfigured(),
     openai: PROVIDERS.openai.isConfigured(),
     "google-ai": PROVIDERS.google.isConfigured(),
+    "claude-code": PROVIDERS["claude-code"].isConfigured(),
   };
   // Roadmap ("coming soon") entries are listed after everything that can be connected today.
   const ordered = [...INTEGRATIONS].sort((a, b) => Number(a.availability === "coming_soon") - Number(b.availability === "coming_soon"));

@@ -1,4 +1,4 @@
-export type ProviderId = "anthropic" | "openai" | "google" | "local";
+export type ProviderId = "anthropic" | "openai" | "google" | "claude-code" | "local";
 
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 

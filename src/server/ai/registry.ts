@@ -2,6 +2,7 @@ import { env } from "../env";
 import { DEFAULT_AI_SETTINGS, getSetting, type AISettings } from "../settings";
 import { DEFAULT_MODEL_BY_PROVIDER, MODEL_CATALOG, findModel } from "./models";
 import { anthropicProvider } from "./providers/anthropic";
+import { claudeCodeProvider } from "./providers/claude-code";
 import { googleProvider } from "./providers/google";
 import { localProvider } from "./providers/local";
 import { openaiProvider } from "./providers/openai";
@@ -11,6 +12,7 @@ export const PROVIDERS: Record<ProviderId, AIProvider> = {
   anthropic: anthropicProvider,
   openai: openaiProvider,
   google: googleProvider,
+  "claude-code": claudeCodeProvider,
   local: localProvider,
 };
 

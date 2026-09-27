@@ -28,7 +28,7 @@ Built by [Infinity Uniquers](https://infinityuniquers.com).
 
 ## Stack
 
-Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · PostgreSQL 16 + Prisma 6 · Redis 7 + BullMQ · Anthropic, OpenAI and Google AI providers · Recharts · Tiptap · Vitest · Playwright · Docker.
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · PostgreSQL 16 + Prisma 6 · Redis 7 + BullMQ · Anthropic, OpenAI, Google and local Claude Code AI providers · Recharts · Tiptap · Vitest · Playwright · Docker.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it fits together.
 
@@ -46,6 +46,24 @@ npm run worker                    # in a second terminal: background jobs and sc
 ```
 
 No API keys are needed: with `AI_DEFAULT_PROVIDER=local` every AI feature runs on a deterministic offline provider (clearly labelled *Infinity Local* in the UI). Add `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or `GOOGLE_AI_API_KEY` to use real models.
+
+### Use your own Claude, without an API key
+
+If [Claude Code](https://claude.com/claude-code) is installed and signed in on the machine running the app, every AI feature can run through it on your Claude plan:
+
+```bash
+npm install -g @anthropic-ai/claude-code   # if not installed
+claude                                     # sign in once, then exit
+```
+
+Then in `.env`:
+
+```bash
+AI_DEFAULT_PROVIDER=claude-code
+AI_REQUEST_TIMEOUT_MS=180000
+```
+
+Restart `npm run dev` and `npm run worker`. Models show up as *Claude Opus / Sonnet / Haiku (local Claude Code)*; Sonnet is the default. The CLI runs with every tool disabled, so it only generates text. This is meant for running the app on your own machine — for a hosted, multi-user deployment use `ANTHROPIC_API_KEY`.
 
 Without Redis, background jobs run in-process so the app still works end to end; the worker process requires Redis.
 

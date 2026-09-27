@@ -6,7 +6,8 @@ describe("model catalog", () => {
   it("has unique ids and positive pricing", () => {
     const ids = MODEL_CATALOG.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
-    for (const m of MODEL_CATALOG.filter((m) => m.provider !== "local")) {
+    // Local and Claude Code models are billed outside the app, so they carry no per-token price.
+    for (const m of MODEL_CATALOG.filter((m) => m.provider !== "local" && m.provider !== "claude-code")) {
       expect(m.inputPerMTok).toBeGreaterThan(0);
       expect(m.outputPerMTok).toBeGreaterThan(m.inputPerMTok);
     }

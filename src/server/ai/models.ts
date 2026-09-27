@@ -9,6 +9,10 @@ export const MODEL_CATALOG: ModelInfo[] = [
   { id: "claude-opus-5", provider: "anthropic", label: "Claude Opus 5", description: "Most capable Claude for strategy and long-form work.", inputPerMTok: 5, outputPerMTok: 25, contextWindow: 1_000_000, noSampling: true },
   { id: "claude-sonnet-5", provider: "anthropic", label: "Claude Sonnet 5", description: "Fast, high-quality everyday writing.", inputPerMTok: 2, outputPerMTok: 10, contextWindow: 1_000_000, noSampling: true },
   { id: "claude-haiku-4-5", provider: "anthropic", label: "Claude Haiku 4.5", description: "Lowest latency for short copy.", inputPerMTok: 1, outputPerMTok: 5, contextWindow: 200_000 },
+  // Local Claude Code CLI: billed to the signed-in Claude plan, so no per-token price here.
+  { id: "claude-code-opus", provider: "claude-code", label: "Claude Opus (local Claude Code)", description: "Most capable Claude via your signed-in Claude Code CLI. No API key.", inputPerMTok: 0, outputPerMTok: 0, contextWindow: 200_000, noSampling: true },
+  { id: "claude-code-sonnet", provider: "claude-code", label: "Claude Sonnet (local Claude Code)", description: "Fast, high-quality writing via your signed-in Claude Code CLI. No API key.", inputPerMTok: 0, outputPerMTok: 0, contextWindow: 200_000, noSampling: true },
+  { id: "claude-code-haiku", provider: "claude-code", label: "Claude Haiku (local Claude Code)", description: "Quickest local Claude for short copy. No API key.", inputPerMTok: 0, outputPerMTok: 0, contextWindow: 200_000, noSampling: true },
   { id: "gpt-4.1", provider: "openai", label: "GPT-4.1", description: "OpenAI flagship general model.", inputPerMTok: 2, outputPerMTok: 8, contextWindow: 1_000_000 },
   { id: "gpt-4.1-mini", provider: "openai", label: "GPT-4.1 mini", description: "Cost-efficient OpenAI model.", inputPerMTok: 0.4, outputPerMTok: 1.6, contextWindow: 1_000_000 },
   { id: "gemini-2.5-pro", provider: "google", label: "Gemini 2.5 Pro", description: "Google's advanced reasoning model.", inputPerMTok: 1.25, outputPerMTok: 10, contextWindow: 1_000_000 },
@@ -20,6 +24,7 @@ export const DEFAULT_MODEL_BY_PROVIDER: Record<ProviderId, string> = {
   anthropic: "claude-opus-5",
   openai: "gpt-4.1",
   google: "gemini-2.5-pro",
+  "claude-code": "claude-code-sonnet",
   local: "infinity-local",
 };
 

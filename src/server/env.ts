@@ -16,13 +16,20 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 
-  AI_DEFAULT_PROVIDER: z.enum(["openai", "anthropic", "google", "local"]).default("local"),
+  AI_DEFAULT_PROVIDER: z.enum(["openai", "anthropic", "google", "claude-code", "local"]).default("local"),
   AI_DEFAULT_MODEL: z.string().optional(),
   AI_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(60000),
   AI_MAX_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),
+  // Local Claude Code CLI provider (uses the signed-in Claude account, no API key)
+  CLAUDE_CODE_PATH: z.string().min(1).default("claude"),
+  CLAUDE_CODE_ENABLED: z
+    .enum(["0", "1", "true", "false"])
+    .default("0")
+    .transform((v) => v === "1" || v === "true"),
+  CLAUDE_CODE_MAX_CONCURRENCY: z.coerce.number().int().min(1).max(16).default(2),
 
   EMAIL_PROVIDER: z.enum(["console", "smtp"]).default("console"),
   EMAIL_FROM: z.string().default("InfinityOps Studio <no-reply@infinityuniquers.com>"),

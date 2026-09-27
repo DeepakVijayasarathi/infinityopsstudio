@@ -29,13 +29,16 @@ Generate secrets with `openssl rand -hex 32`.
 
 | Variable | Default | Description |
 |---|---|---|
-| `AI_DEFAULT_PROVIDER` | `local` | `anthropic`, `openai`, `google` or `local` (offline demo provider) |
+| `AI_DEFAULT_PROVIDER` | `local` | `anthropic`, `openai`, `google`, `claude-code` (local Claude Code CLI, no API key) or `local` (offline demo provider) |
 | `AI_DEFAULT_MODEL` | — | Optional default model id, e.g. `claude-sonnet-5`. Admins can override it in `/admin/settings` |
 | `AI_REQUEST_TIMEOUT_MS` | `60000` | Per-call timeout |
 | `AI_MAX_RETRIES` | `2` | Retries for rate limits, timeouts and server errors (0–5) |
 | `ANTHROPIC_API_KEY` | — | Enables Claude models |
 | `OPENAI_API_KEY` | — | Enables GPT models |
 | `GOOGLE_AI_API_KEY` | — | Enables Gemini models |
+| `CLAUDE_CODE_ENABLED` | `0` | Offer the local Claude Code models even when another provider is the default. Implied by `AI_DEFAULT_PROVIDER=claude-code` |
+| `CLAUDE_CODE_PATH` | `claude` | Path to the Claude Code CLI binary |
+| `CLAUDE_CODE_MAX_CONCURRENCY` | `2` | Maximum CLI processes running at once (per app or worker process) |
 
 Models only appear in pickers when their provider has a key. See [AI_ARCHITECTURE.md](AI_ARCHITECTURE.md).
 

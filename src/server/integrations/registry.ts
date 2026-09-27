@@ -173,6 +173,7 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
   // AI providers — configured platform-wide by administrators (keys never reach the browser).
   { key: "anthropic", name: "Anthropic Claude", category: "AI providers", logo: "A", color: "#d97757", availability: "admin", description: "Claude models for strategy and long-form content.", fields: [], capabilities: ["ai"] },
   { key: "openai", name: "OpenAI", category: "AI providers", logo: "O", color: "#10a37f", availability: "admin", description: "GPT models for content generation.", fields: [], capabilities: ["ai"] },
+  { key: "claude-code", name: "Claude Code (local)", category: "AI providers", logo: "CC", color: "#c96442", availability: "admin", description: "Claude through the Claude Code CLI signed in on the server machine. No API key.", fields: [], capabilities: ["ai"] },
   { key: "google-ai", name: "Google Gemini", category: "AI providers", logo: "G", color: "#4285f4", availability: "admin", description: "Gemini models for fast generation.", fields: [], capabilities: ["ai"] },
   // Webhooks
   {
