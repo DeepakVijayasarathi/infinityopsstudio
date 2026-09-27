@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ios
+          POSTGRES_PASSWORD: ios
+          POSTGRES_DB: infinityops
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ios" --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://ios:ios@localhost:5432/infinityops?schema=public
+      TEST_DATABASE_URL: postgresql://ios:ios@localhost:5432/infinityops_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      APP_URL: http://localhost:3000
+      AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+      ENCRYPTION_KEY: 3c1f2a4b5d6e7f80910a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60
+      AI_DEFAULT_PROVIDER: local
+      EMAIL_PROVIDER: console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Create test database
+        run: PGPASSWORD=ios psql -h localhost -U ios -d infinityops -c "CREATE DATABASE infinityops_test"
+      - run: npm test
+      - run: npm run build
+      - name: Migrate and seed
+        run: npx prisma migrate deploy && npm run db:seed
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end tests
+        env:
+          NODE_ENV: production
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  docker:
+    name: Docker images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build web image
+        run: docker build --target web -t infinityops-studio-web:ci .
+      - name: Build tools image
+        run: docker build --target tools -t infinityops-studio-tools:ci .

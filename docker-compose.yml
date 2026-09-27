@@ -1,0 +1,113 @@
+# Local production-like stack: web + worker + PostgreSQL + Redis.
+#   cp .env.example .env   # then set AUTH_SECRET and ENCRYPTION_KEY
+#   docker compose up --build
+# The one-off "migrate" service applies migrations (and seeds demo data when SEED_DEMO=1)
+# before the web and worker services start.
+
+x-app-env: &app-env
+  NODE_ENV: production
+  APP_URL: ${APP_URL:-http://localhost:3000}
+  DATABASE_URL: postgresql://${POSTGRES_USER:-ios}:${POSTGRES_PASSWORD:-ios}@db:5432/${POSTGRES_DB:-infinityops}?schema=public
+  REDIS_URL: redis://redis:6379
+  AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env (openssl rand -hex 32)}
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in .env (openssl rand -hex 32)}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+  AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-local}
+  AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY:-}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:-console}
+  EMAIL_FROM: ${EMAIL_FROM:-InfinityOps Studio <no-reply@infinityuniquers.com>}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  BILLING_PROVIDER: ${BILLING_PROVIDER:-manual}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+  RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+  RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+  STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+  STORAGE_LOCAL_DIR: /app/storage
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_REGION: ${S3_REGION:-}
+  S3_ENDPOINT: ${S3_ENDPOINT:-}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ios}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ios}
+      POSTGRES_DB: ${POSTGRES_DB:-infinityops}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: { context: ., target: tools }
+    image: infinityops-studio-tools:latest
+    init: true
+    environment:
+      <<: *app-env
+      SEED_DEMO: ${SEED_DEMO:-1}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["npx prisma migrate deploy && if [ \"$$SEED_DEMO\" = \"1\" ]; then npx tsx prisma/seed.ts --if-empty; fi"]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  web:
+    build: { context: ., target: web }
+    image: infinityops-studio-web:latest
+    init: true
+    restart: unless-stopped
+    environment: *app-env
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+
+  worker:
+    image: infinityops-studio-tools:latest
+    init: true
+    restart: unless-stopped
+    environment: *app-env
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      redis: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+
+volumes:
+  pgdata:
+  redisdata:
+  storage:

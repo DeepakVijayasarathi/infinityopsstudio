@@ -58,6 +58,11 @@ async function upsertUser(email: string, name: string, password: string, extra: 
 }
 
 async function main() {
+  // `--if-empty` (used by docker compose) seeds only a fresh database, so restarts never reset demo data.
+  if (process.argv.includes("--if-empty") && (await db.user.count()) > 0) {
+    console.log("Database already has users — skipping seed.");
+    return;
+  }
   console.log("Seeding InfinityOps Studio…");
   const roles = await ensureRoles();
 
