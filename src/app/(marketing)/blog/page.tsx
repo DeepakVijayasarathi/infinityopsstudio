@@ -7,7 +7,7 @@ import { cn, formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Practical guides on AI marketing, automation, SEO, email, social media and analytics from the Infinity Ops Studio team.",
+  description: "Practical guides on AI marketing, automation, SEO, email, social media and analytics from the InfinityOps Studio team.",
   alternates: { canonical: "/blog" },
 };
 

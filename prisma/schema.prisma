@@ -1,4 +1,4 @@
-// Infinity Ops Studio — database schema
+// InfinityOps Studio — database schema
 // Every tenant-owned table carries `workspaceId` and is indexed on it.
 // Services must always scope queries by workspace (see src/server/tenant.ts).
 

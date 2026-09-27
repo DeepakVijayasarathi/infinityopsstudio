@@ -25,7 +25,7 @@ const schema = z.object({
   GOOGLE_AI_API_KEY: z.string().optional(),
 
   EMAIL_PROVIDER: z.enum(["console", "smtp"]).default("console"),
-  EMAIL_FROM: z.string().default("Infinity Ops Studio <no-reply@infinityuniquers.com>"),
+  EMAIL_FROM: z.string().default("InfinityOps Studio <no-reply@infinityuniquers.com>"),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().optional(),
   SMTP_USER: z.string().optional(),

@@ -58,7 +58,7 @@ async function upsertUser(email: string, name: string, password: string, extra: 
 }
 
 async function main() {
-  console.log("Seeding Infinity Ops Studio…");
+  console.log("Seeding InfinityOps Studio…");
   const roles = await ensureRoles();
 
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin12345!";

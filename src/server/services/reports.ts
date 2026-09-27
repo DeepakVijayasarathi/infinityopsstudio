@@ -106,7 +106,7 @@ export async function analyticsPdf(workspaceId: string, r: DateRange): Promise<U
   };
 
   page.drawRectangle({ x: 0, y: 812, width: 595, height: 30, color: brand });
-  page.drawText("Infinity Ops Studio", { x: margin, y: 822, size: 11, font: bold, color: rgb(1, 1, 1) });
+  page.drawText("InfinityOps Studio", { x: margin, y: 822, size: 11, font: bold, color: rgb(1, 1, 1) });
   text(`Marketing performance report`, { size: 20, f: bold });
   text(`${ws.name} · ${r.from.toDateString()} - ${r.to.toDateString()}`, { color: muted });
   y -= 10;

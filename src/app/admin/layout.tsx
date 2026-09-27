@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/server/auth/session";
 import { AdminShell } from "./admin-shell";
 
-export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · Infinity Ops Studio" }, robots: { index: false } };
+export const metadata: Metadata = { title: { default: "Admin", template: "%s · Admin · InfinityOps Studio" }, robots: { index: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();

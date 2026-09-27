@@ -153,7 +153,7 @@ export async function inviteMember(ctx: WorkspaceContext, input: { email: string
   });
   const url = `${env().APP_URL}/invite/${token}`;
   const mail = actionEmail({
-    title: `Join ${ctx.workspace.name} on Infinity Ops Studio`,
+    title: `Join ${ctx.workspace.name} on InfinityOps Studio`,
     intro: `${ctx.user.name} invited you to join the ${ctx.workspace.name} workspace as ${role.name}.`,
     actionUrl: url,
     actionLabel: "Accept invitation",

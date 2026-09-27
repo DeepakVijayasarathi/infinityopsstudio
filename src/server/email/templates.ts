@@ -29,7 +29,7 @@ export function actionEmail(opts: { title: string; intro: string; actionUrl: str
 export function notificationEmail(title: string, body: string, link?: string) {
   const url = link ? (link.startsWith("http") ? link : `${siteConfig.url}${link}`) : undefined;
   return {
-    html: layout(title, `<p>${escape(body)}</p>${url ? button(url, "Open in Infinity Ops Studio") : ""}`),
+    html: layout(title, `<p>${escape(body)}</p>${url ? button(url, "Open in InfinityOps Studio") : ""}`),
     text: `${title}\n\n${body}${url ? `\n\n${url}` : ""}`,
   };
 }

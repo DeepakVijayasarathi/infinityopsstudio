@@ -139,7 +139,7 @@ export function ProfileView({ profile, sessions }: { profile: Profile; sessions:
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" asChild>
-                  <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(`Infinity Ops Studio recovery codes for ${profile.email}\n\n${codes.join("\n")}\n`)}`} download="infinity-ops-recovery-codes.txt">
+                  <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(`InfinityOps Studio recovery codes for ${profile.email}\n\n${codes.join("\n")}\n`)}`} download="infinity-ops-recovery-codes.txt">
                     <Download /> Download
                   </a>
                 </Button>

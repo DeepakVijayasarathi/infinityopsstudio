@@ -131,17 +131,9 @@ export function SimpleBarChart<T extends Record<string, unknown>>({ data, xKey, 
       <ResponsiveContainer width="100%" height={height}>
         <RBarChart data={data} layout={horizontal ? "vertical" : "horizontal"} margin={{ top: 6, right: 8, left: horizontal ? 8 : -12, bottom: 0 }} barGap={2} barCategoryGap="28%">
           <CartesianGrid stroke="var(--chart-grid)" vertical={!!horizontal} horizontal={!horizontal} />
-          {horizontal ? (
-            <>
-              <XAxis type="number" {...axisProps} tickFormatter={(v) => formatCompact(Number(v))} />
-              <YAxis type="category" dataKey={xKey} {...axisProps} width={110} />
-            </>
-          ) : (
-            <>
-              <XAxis dataKey={xKey} {...axisProps} tickFormatter={fmtX} minTickGap={16} />
-              <YAxis {...axisProps} tickFormatter={(v) => formatCompact(Number(v))} width={48} />
-            </>
-          )}
+          {/* Recharts only discovers axes that are direct children, so no fragments here. */}
+          {horizontal ? <XAxis type="number" {...axisProps} tickFormatter={(v) => formatCompact(Number(v))} /> : <XAxis dataKey={xKey} {...axisProps} tickFormatter={fmtX} minTickGap={16} />}
+          {horizontal ? <YAxis type="category" dataKey={xKey} {...axisProps} width={120} /> : <YAxis {...axisProps} tickFormatter={(v) => formatCompact(Number(v))} width={48} />}
           <Tooltip content={<ChartTooltip series={series} labelFormat={fmtX} />} cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} />
           {series.map((s, i) => (
             <Bar

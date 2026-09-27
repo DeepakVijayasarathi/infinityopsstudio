@@ -102,7 +102,7 @@ export const stripeProvider: BillingProvider = {
       "line_items[0][price_data][currency]": "usd",
       "line_items[0][price_data][unit_amount]": String(priceFor(i.plan, i.interval)),
       "line_items[0][price_data][recurring][interval]": i.interval === "YEARLY" ? "year" : "month",
-      "line_items[0][price_data][product_data][name]": `Infinity Ops Studio ${plan.name}`,
+      "line_items[0][price_data][product_data][name]": `InfinityOps Studio ${plan.name}`,
       "metadata[workspaceId]": i.workspaceId,
       "metadata[plan]": i.plan,
       "metadata[interval]": i.interval,

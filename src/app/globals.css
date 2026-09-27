@@ -14,13 +14,15 @@
   --muted-foreground: 220 11% 43%;
   --border: 220 18% 90%;
   --input: 220 18% 88%;
-  --ring: 244 76% 60%;
-  --primary: 244 76% 58%;
+  --ring: 226 94% 58%;
+  --primary: 226 94% 54%;
+  --brand: 244 86% 58%;
+  --brand-ink: 226 64% 16%;
   --primary-foreground: 0 0% 100%;
   --secondary: 220 22% 95%;
   --secondary-foreground: 224 32% 14%;
-  --accent: 262 83% 96%;
-  --accent-foreground: 262 60% 38%;
+  --accent: 222 100% 96%;
+  --accent-foreground: 230 72% 42%;
   --success: 152 60% 36%;
   --warning: 36 92% 44%;
   --danger: 0 72% 51%;
@@ -58,13 +60,15 @@
   --muted-foreground: 220 12% 62%;
   --border: 228 16% 17%;
   --input: 228 16% 20%;
-  --ring: 244 80% 68%;
-  --primary: 244 82% 66%;
+  --ring: 224 100% 68%;
+  --primary: 224 96% 62%;
+  --brand: 250 100% 76%;
+  --brand-ink: 220 30% 96%;
   --primary-foreground: 0 0% 100%;
   --secondary: 228 18% 15%;
   --secondary-foreground: 220 20% 92%;
-  --accent: 262 40% 18%;
-  --accent-foreground: 262 90% 84%;
+  --accent: 228 45% 18%;
+  --accent-foreground: 222 100% 84%;
   --success: 152 55% 50%;
   --warning: 38 92% 58%;
   --danger: 0 80% 64%;
@@ -102,6 +106,8 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   --color-primary: hsl(var(--primary));
+  --color-brand: hsl(var(--brand));
+  --color-brand-ink: hsl(var(--brand-ink));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
@@ -170,15 +176,15 @@
     box-shadow: 0 1px 2px hsl(var(--shadow-color) / 0.04), 0 4px 16px -8px hsl(var(--shadow-color) / 0.08);
   }
   .text-gradient {
-    background: linear-gradient(120deg, hsl(244 80% 62%), hsl(275 75% 60%) 50%, hsl(200 90% 52%));
+    background: linear-gradient(110deg, #00b4f0, #0a6bff 35%, #3a3df2 65%, #8a2bff);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .bg-hero-glow {
     background:
-      radial-gradient(60% 50% at 20% 0%, hsl(244 80% 60% / 0.16), transparent 70%),
-      radial-gradient(50% 40% at 85% 10%, hsl(200 90% 55% / 0.12), transparent 70%);
+      radial-gradient(60% 50% at 20% 0%, hsl(222 100% 56% / 0.16), transparent 70%),
+      radial-gradient(50% 40% at 85% 10%, hsl(268 100% 60% / 0.12), transparent 70%);
   }
   .bg-grid {
     background-image: linear-gradient(hsl(var(--border) / 0.6) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.6) 1px, transparent 1px);

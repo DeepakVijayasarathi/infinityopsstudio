@@ -90,7 +90,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
 
       <OverviewCharts
         series={series.map((s) => ({ date: s.date, visits: s.visits, leads: s.leads, engagements: s.engagements, conversions: s.conversions }))}
-        campaigns={campaigns.filter((c) => c.impressions > 0).slice(0, 6).map((c) => ({ name: c.name.length > 22 ? `${c.name.slice(0, 21)}…` : c.name, leads: c.leads }))}
+        campaigns={campaigns.filter((c) => c.impressions > 0).slice(0, 6).map((c) => ({ name: c.name.length > 18 ? `${c.name.slice(0, 17)}…` : c.name, leads: c.leads }))}
         ai={ai.series.map((s) => ({ date: s.date, requests: s.requests }))}
       />
 

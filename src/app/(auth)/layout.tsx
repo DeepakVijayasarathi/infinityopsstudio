@@ -31,7 +31,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="bg-hero-glow absolute inset-0" />
         <div className="bg-grid absolute inset-0 opacity-60" />
         <div className="relative flex h-full flex-col justify-center p-12">
-          <p className="text-sm font-medium text-primary">Infinity Ops Studio</p>
+          <p className="text-sm font-medium text-primary">InfinityOps Studio</p>
           <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight">
             Your AI marketing <span className="text-gradient">operations team</span>
           </h2>

@@ -38,7 +38,7 @@ export async function sendVerificationEmail(user: { id: string; email: string; n
   const token = await createVerificationToken(user.id, "EMAIL_VERIFICATION", 48 * 3600_000);
   const mail = actionEmail({
     title: "Verify your email address",
-    intro: `Hi ${user.name}, confirm your email to secure your Infinity Ops Studio account.`,
+    intro: `Hi ${user.name}, confirm your email to secure your InfinityOps Studio account.`,
     actionUrl: `${env().APP_URL}/verify-email?token=${token}`,
     actionLabel: "Verify email",
     outro: "This link expires in 48 hours.",
@@ -148,7 +148,7 @@ export async function requestPasswordReset(emailRaw: string, meta: Meta) {
   const token = await createVerificationToken(user.id, "PASSWORD_RESET", 60 * 60_000);
   const mail = actionEmail({
     title: "Reset your password",
-    intro: "We received a request to reset your Infinity Ops Studio password. If this wasn't you, you can ignore this email.",
+    intro: "We received a request to reset your InfinityOps Studio password. If this wasn't you, you can ignore this email.",
     actionUrl: `${env().APP_URL}/reset-password?token=${token}`,
     actionLabel: "Choose a new password",
     outro: "This link expires in 1 hour.",

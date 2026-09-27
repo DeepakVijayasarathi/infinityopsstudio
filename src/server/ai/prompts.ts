@@ -4,7 +4,7 @@ export const TONES = ["Professional", "Friendly", "Persuasive", "Casual", "Luxur
 export type Tone = (typeof TONES)[number];
 
 export const CONTENT_SYSTEM_PROMPT =
-  "You are the Infinity Ops Studio content engine: an expert marketing copywriter. Output only the requested content in clean Markdown — no preamble, no explanations, no surrounding quotes. Follow the brand context exactly.";
+  "You are the InfinityOps Studio content engine: an expert marketing copywriter. Output only the requested content in clean Markdown — no preamble, no explanations, no surrounding quotes. Follow the brand context exactly.";
 
 export type GeneratorKey =
   | "blog"

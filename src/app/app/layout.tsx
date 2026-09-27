@@ -11,7 +11,7 @@ import { VerifyEmailBanner } from "@/components/app/verify-email-banner";
 import { DEFAULT_PLATFORM_SETTINGS, getSetting } from "@/server/settings";
 import { Megaphone } from "lucide-react";
 
-export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · Infinity Ops Studio" }, robots: { index: false } };
+export const metadata: Metadata = { title: { default: "Dashboard", template: "%s · InfinityOps Studio" }, robots: { index: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireContext();
