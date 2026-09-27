@@ -1,0 +1,7 @@
+import { execSync } from "node:child_process";
+
+/** Applies pending migrations to the test database. Tests truncate tables themselves (see helpers/factory). */
+export default function setup() {
+  const url = process.env.TEST_DATABASE_URL ?? "postgresql://ios:ios@localhost:5432/infinityops_test?schema=public";
+  execSync("npx prisma migrate deploy", { env: { ...process.env, DATABASE_URL: url }, stdio: "pipe" });
+}

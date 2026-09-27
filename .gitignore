@@ -13,3 +13,6 @@ storage/
 .DS_Store
 npm-debug.log*
 dump.rdb
+test-results/
+playwright-report/
+.test-storage/

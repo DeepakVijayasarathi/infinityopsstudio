@@ -92,7 +92,7 @@ export async function createWorkspace(userId: string, input: { name: string; ind
     return workspace;
   };
   const workspace = tx ? await run(tx) : await db.$transaction(run);
-  await audit({ action: "workspace.created", workspaceId: workspace.id, actorId: userId, entityType: "Workspace", entityId: workspace.id });
+  await audit({ action: "workspace.created", workspaceId: workspace.id, actorId: userId, entityType: "Workspace", entityId: workspace.id }, tx);
   return workspace;
 }
 

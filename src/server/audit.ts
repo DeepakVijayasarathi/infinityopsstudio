@@ -14,9 +14,10 @@ export type AuditInput = {
 };
 
 /** Append-only audit trail. Failures are logged, never thrown, so auditing cannot break a request. */
-export async function audit(input: AuditInput): Promise<void> {
+export async function audit(input: AuditInput, client: Pick<Prisma.TransactionClient, "auditLog"> = db): Promise<void> {
   try {
-    await db.auditLog.create({ data: input });
+    // Pass the transaction client when auditing rows created inside an open transaction.
+    await client.auditLog.create({ data: input });
   } catch (err) {
     logger.error("Failed to write audit log", { err, action: input.action });
   }

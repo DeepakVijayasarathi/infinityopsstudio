@@ -6,12 +6,18 @@ import { enqueue } from "../queue";
 import { generateText, streamText } from "../ai/service";
 import type { WorkspaceContext } from "../tenant";
 import { notify } from "./notifications";
-import { getWorkerTemplate, type WorkerCapability } from "@/config/workers";
+import { WORKER_TEMPLATES, getWorkerTemplate, type WorkerCapability } from "@/config/workers";
 import { getPlan, withinLimit } from "@/config/plans";
 import { paginated, pageArgs, type PaginationInput } from "../pagination";
 
 export async function listWorkers(workspaceId: string) {
-  const workers = await db.aIWorker.findMany({ where: { workspaceId }, orderBy: { createdAt: "asc" } });
+  const all = await db.aIWorker.findMany({ where: { workspaceId }, orderBy: { createdAt: "asc" } });
+  // Workers are created in one batch (identical timestamps), so order by the roster definition.
+  const rank = (key: string) => {
+    const i = WORKER_TEMPLATES.findIndex((t) => t.key === key);
+    return i < 0 ? WORKER_TEMPLATES.length : i;
+  };
+  const workers = all.sort((a, b) => rank(a.key) - rank(b.key));
   const stats = await db.aITask.groupBy({ by: ["workerId", "status"], where: { workspaceId }, _count: true });
   return workers.map((w) => {
     const mine = stats.filter((s) => s.workerId === w.id);

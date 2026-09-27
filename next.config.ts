@@ -29,7 +29,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Docker builds set BUILD_STANDALONE=1 for a minimal self-contained server; `npm start` uses the regular output.
+  output: process.env.BUILD_STANDALONE === "1" ? "standalone" : undefined,
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ["@prisma/client", "bullmq", "ioredis", "nodemailer", "pdf-lib"],
