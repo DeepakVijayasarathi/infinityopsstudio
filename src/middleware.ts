@@ -2,6 +2,28 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const SESSION_COOKIE = "ios_session";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const isDev = process.env.NODE_ENV !== "production";
+
+// Next.js injects inline bootstrap scripts, so script-src needs 'unsafe-inline';
+// every other directive is locked down.
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://accounts.google.com https://checkout.stripe.com",
+  "object-src 'none'",
+].join("; ");
+
+/** True when the browser reached us over https (directly or through a TLS-terminating proxy). */
+function isHttps(req: NextRequest): boolean {
+  const proto = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? req.nextUrl.protocol.replace(":", "");
+  return proto === "https";
+}
 // Server-to-server endpoints authenticated by signatures/tokens instead of cookies.
 const CSRF_EXEMPT = ["/api/v1/billing/webhooks/", "/api/v1/hooks/", "/api/v1/email/track/", "/api/v1/email/unsubscribe/"];
 
@@ -61,6 +83,11 @@ export function middleware(req: NextRequest) {
   headers.set("x-pathname", pathname);
   const res = NextResponse.next({ request: { headers } });
   res.headers.set("x-request-id", requestId);
+  // Upgrading sub-requests and HSTS only make sense when the page itself is served over https;
+  // on plain http (e.g. http://<server-ip>:<port>) they would break every script and stylesheet.
+  const https = isHttps(req);
+  res.headers.set("Content-Security-Policy", https && !isDev ? `${CSP}; upgrade-insecure-requests` : CSP);
+  if (https && !isDev) res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
   return res;
 }
 
