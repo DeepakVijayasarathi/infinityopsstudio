@@ -79,6 +79,17 @@ Without Redis, background jobs run in-process so the app still works end to end;
 
 Change these with `SEED_DEMO_PASSWORD` / `SEED_ADMIN_PASSWORD` before seeding anything reachable from the internet.
 
+## Deploy to a server (one command)
+
+On a fresh Ubuntu/Debian server, as root:
+
+```bash
+git clone https://github.com/DeepakVijayasarathi/infinityopsstudio.git /opt/infinityops
+cd /opt/infinityops && bash deploy.sh
+```
+
+`deploy.sh` installs Docker if needed, creates `.env` with fresh secrets on the first run, builds and starts the stack, waits until it is healthy and prints the URL. Add `DOMAIN=app.example.com bash deploy.sh` to serve it over HTTPS with Caddy (point the domain's DNS at the server first). Run it again any time to update; data and secrets are kept.
+
 ## Docker
 
 ```bash

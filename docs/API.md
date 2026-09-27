@@ -10,7 +10,7 @@ InfinityOps Studio exposes a JSON REST API under `/api/v1`. The web app is its o
 
 **Permissions.** Each endpoint declares the permission it needs (the *Access* column below). Permissions come from the member's role — see the matrix in [SECURITY.md](SECURITY.md#roles-and-permissions).
 
-**CSRF.** Mutating requests (`POST`, `PUT`, `PATCH`, `DELETE`) must carry an `Origin` (or `Referer`) matching `APP_URL`, the request origin or an entry in `ALLOWED_ORIGINS`. Webhook, tracking and unsubscribe endpoints are exempt because they authenticate with signatures or signed tokens instead of cookies.
+**CSRF.** Mutating requests (`POST`, `PUT`, `PATCH`, `DELETE`) must carry an `Origin` (or `Referer`) matching the host the request was sent to, `APP_URL` or an entry in `ALLOWED_ORIGINS`. Webhook, tracking and unsubscribe endpoints are exempt because they authenticate with signatures or signed tokens instead of cookies.
 
 **Requests.** Bodies are JSON (`content-type: application/json`, max 1 MB) and validated with zod; file uploads use `multipart/form-data`.
 

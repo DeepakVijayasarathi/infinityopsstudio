@@ -2,6 +2,15 @@
 
 InfinityOps Studio runs as two processes from one codebase — the **web** app and the **worker** — plus PostgreSQL 16 and Redis 7.
 
+## One-command server deploy
+
+```bash
+git clone https://github.com/DeepakVijayasarathi/infinityopsstudio.git /opt/infinityops
+cd /opt/infinityops && sudo bash deploy.sh
+```
+
+`deploy.sh` installs Docker when missing, pulls the latest code, creates `.env` on the first run (random `AUTH_SECRET`, `ENCRYPTION_KEY` and database password; existing secrets are never regenerated), sets `NODE_ENV=production` and `APP_URL`, runs `docker compose up -d --build`, and waits for `/api/ready`. Options: `APP_URL`, `WEB_PORT`, `SEED_DEMO=0`, `DOMAIN` (installs Caddy with automatic HTTPS) and `NO_BUILD=1`.
+
 ## Docker Compose (single host)
 
 ```bash

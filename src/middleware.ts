@@ -12,6 +12,16 @@ function allowedOrigins(req: NextRequest): Set<string> {
   return set;
 }
 
+/** Same-origin check against the host the browser actually addressed (works behind proxies and by IP or domain). */
+function sameHost(req: NextRequest, origin: string): boolean {
+  const host = req.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ?? req.headers.get("host");
+  try {
+    return !!host && new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID();
@@ -19,7 +29,7 @@ export function middleware(req: NextRequest) {
   // CSRF defence-in-depth (cookies are SameSite=Lax): state-changing API calls must come from our origin.
   if (pathname.startsWith("/api/") && !SAFE_METHODS.has(req.method) && !CSRF_EXEMPT.some((p) => pathname.startsWith(p))) {
     const origin = req.headers.get("origin") ?? (req.headers.get("referer") ? new URL(req.headers.get("referer")!).origin : null);
-    if (!origin || !allowedOrigins(req).has(origin)) {
+    if (!origin || !(allowedOrigins(req).has(origin) || sameHost(req, origin))) {
       return NextResponse.json({ error: { code: "FORBIDDEN", message: "Cross-origin request blocked" } }, { status: 403 });
     }
   }

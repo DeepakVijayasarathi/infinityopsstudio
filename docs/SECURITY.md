@@ -46,7 +46,7 @@ Permissions are enforced on the server — in `route()` for every API call and i
 
 ## Web protections
 
-- **CSRF**: `SameSite=Lax` cookies plus middleware that rejects state-changing API requests whose `Origin`/`Referer` isn't the app's own origin or an `ALLOWED_ORIGINS` entry. Signature-authenticated endpoints (billing webhooks, workflow hooks, email tracking, unsubscribe) are exempt.
+- **CSRF**: `SameSite=Lax` cookies plus middleware that rejects state-changing API requests whose `Origin`/`Referer` doesn't match the host the request was sent to, `APP_URL` or an `ALLOWED_ORIGINS` entry. Signature-authenticated endpoints (billing webhooks, workflow hooks, email tracking, unsubscribe) are exempt.
 - **Security headers** (all responses): Content-Security-Policy (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`, restricted `form-action`), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin`, and HSTS with preload in production. `X-Powered-By` is removed. `script-src` allows `'unsafe-inline'` because Next.js injects inline bootstrap scripts.
 - **XSS**: React escapes output by default. User and AI Markdown is rendered with `marked` and sanitised with `sanitize-html` on the server and DOMPurify in the browser; shared content pages render sanitised HTML only.
 - **SSRF**: URLs fetched on a user's behalf (SEO audits, outgoing webhooks) must be `http(s)`, resolve to public addresses (private, loopback, link-local, CGNAT and multicast ranges are refused) and are re-checked on every redirect.
