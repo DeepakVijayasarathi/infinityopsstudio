@@ -1,7 +1,7 @@
 .git
 .next
 node_modules
-storage
+/storage
 .test-storage
 test-results
 playwright-report
