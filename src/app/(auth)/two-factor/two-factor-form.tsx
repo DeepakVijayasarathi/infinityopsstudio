@@ -31,7 +31,7 @@ export function TwoFactorForm({ next, email }: { next: string; email: string }) 
       <p className="mt-1 text-sm text-muted-foreground">
         {recovery ? "Enter one of your saved recovery codes." : "Enter the 6-digit code from your authenticator app."} Signing in as <strong>{email}</strong>.
       </p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+      <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
         {f.formError && <FormAlert>{f.formError}</FormAlert>}
         <Field label={recovery ? "Recovery code" : "Authentication code"} htmlFor="code" error={f.errors.code}>
           <Input

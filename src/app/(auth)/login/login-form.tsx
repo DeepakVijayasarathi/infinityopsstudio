@@ -31,7 +31,7 @@ export function LoginForm({ next, initialError }: { next: string; initialError: 
         <GoogleButton />
       </div>
       <Divider label="or sign in with email" />
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form method="post" onSubmit={onSubmit} className="space-y-4" noValidate>
         {(f.formError || initialError) && <FormAlert>{f.formError ?? initialError}</FormAlert>}
         <Field label="Work email" htmlFor="email" error={f.errors.email}>
           <Input {...f.bind("email")} type="email" autoComplete="email" placeholder="you@company.com" autoFocus />

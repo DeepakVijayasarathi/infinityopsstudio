@@ -28,7 +28,7 @@ function RequestRecovery() {
           If two-factor authentication is enabled for that account, a recovery link has been sent. It expires in 30 minutes.
         </FormAlert>
       ) : (
-        <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+        <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
           {f.formError && <FormAlert>{f.formError}</FormAlert>}
           <Field label="Account email" htmlFor="email" error={f.errors.email}>
             <Input {...f.bind("email")} type="email" autoComplete="email" autoFocus />

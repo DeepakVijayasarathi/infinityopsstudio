@@ -9,6 +9,12 @@ import type { AIProvider, GenerateParams, GenerateResult, StreamChunk } from "..
 
 type Brief = { instruction: string; subject: string; brand: string; audience: string; tone: string; source: string };
 
+/** "Operations leaders at mid-size 3PLs (50–1,000 employees) who are…" → "operations leaders at mid-size 3PLs" */
+function shortAudience(a: string): string {
+  const core = a.split(/\s*\(|\s+who\s+|[.;:]/)[0]?.trim() ?? "";
+  return core ? core.charAt(0).toLowerCase() + core.slice(1) : "";
+}
+
 function extract(p: GenerateParams): Brief {
   const last = [...p.messages].reverse().find((m) => m.role === "user")?.content ?? "";
   const sys = p.system ?? "";
@@ -22,7 +28,7 @@ function extract(p: GenerateParams): Brief {
     instruction: last.toLowerCase(),
     subject: subject.replace(/[.\s]+$/, ""),
     brand: field(/Company:\s*([^\n]+)/i, sys) || "your brand",
-    audience: field(/Target audience:\s*([^\n]+)/i, sys) || "your ideal customers",
+    audience: shortAudience(field(/Target audience:\s*([^\n]+)/i, sys)) || "your ideal customers",
     tone: field(/(?:Tone|Brand voice):\s*([^\n]+)/i, sys + "\n" + last) || "professional",
     source,
   };
@@ -99,15 +105,16 @@ function document(b: Brief): string {
     ];
     return `## Keyword research: ${cap(s)}\n\n| Keyword | Intent | Difficulty | Priority | Content type |\n|---|---|---|---|---|\n${kws.map((k) => `| ${k.join(" | ")} |`).join("\n")}\n\n### Clusters\n- **Core commercial:** ${kws.slice(0, 4).map((k) => k[0]).join(", ")}\n- **Education:** ${kws.slice(4, 8).map((k) => k[0]).join(", ")}\n- **Comparison:** ${kws.slice(8).map((k) => k[0]).join(", ")}\n\n### Next steps\n1. Build the pillar page first and link every cluster article to it.\n2. Publish two supporting articles per week.\n3. Track rankings weekly and refresh content after 90 days.`;
   }
-  if (/caption|social|post/.test(i)) {
-    const tags = s.toLowerCase().split(/\s+/).filter((w) => w.length > 3).slice(0, 3).map((w) => `#${w.replace(/[^a-z0-9]/g, "")}`);
-    return `## Social posts: ${cap(s)}\n\n**LinkedIn**\n${cap(s)}. Here's what we learned along the way — and what it means for ${b.audience}. 👇\n\n1. Start with the customer problem, not the feature.\n2. Measure one metric that matters.\n3. Share the wins *and* the lessons.\n\nWhat would you add? ${[...tags, "#marketing"].join(" ")}\n\n**Instagram**\n${cap(s)} ✨ Swipe to see how it works → Save this for later. ${[...tags, "#growth", "#smallbusiness"].join(" ")}\n\n**X**\n${cap(s)}. The short version: less busywork, better results. Thread 🧵 ${tags.slice(0, 2).join(" ")}`;
+  if (/blog|article/.test(i)) {
+    return `# ${cap(s)}\n\n*For ${b.audience} who want results without adding headcount.*\n\nMarketing teams are being asked to do more with less. The good news: the right systems make that possible. In this guide we break down exactly how to approach ${s.toLowerCase()} — with practical steps you can apply this week.\n\n## Why it matters now\n\nBuyers research more channels than ever before they talk to sales. Consistent, useful content across those channels is what earns attention — and consistency is exactly what small teams struggle with.\n\n## A practical framework\n\n### 1. Start with one clear outcome\nPick a single metric — qualified leads, trial signups or revenue — and make every piece of work ladder up to it.\n\n### 2. Build a repeatable production system\nTemplates, a shared brand kit and an approval workflow turn one-off efforts into a machine that runs every week.\n\n### 3. Automate the handoffs\nThe biggest time sink is rarely the work itself — it's moving work between people and tools. Automate scheduling, routing and reporting.\n\n### 4. Review, learn, repeat\nHold a 30-minute weekly review. Keep what works, cut what doesn't, and document the learning.\n\n## Common mistakes to avoid\n\n- Chasing every channel at once instead of mastering two\n- Publishing without a distribution plan\n- Measuring vanity metrics instead of pipeline\n\n## Key takeaways\n\n- Focus on one outcome and measure it weekly\n- Systems beat heroics — templatize and automate\n- Small, consistent improvements compound\n\n**Ready to put this into practice?** Start your free ${b.brand} workspace and have your first campaign running today.`;
+  }
+  if (/caption|social|\bposts?\b/.test(i)) {
+    const STOP = new Set(["about", "their", "there", "these", "those", "which", "while", "where", "your", "with", "from", "that", "this", "what", "when", "signs", "costing", "money", "just", "into", "over"]);
+    const tags = [...new Set(s.toLowerCase().match(/[a-z]{5,}/g) ?? [])].filter((w) => !STOP.has(w)).slice(0, 3).map((w) => `#${w}`);
+    return `## Social posts: ${cap(s)}\n\n**LinkedIn**\n\n${cap(s)}. Here's what we learned along the way — and what it means for ${b.audience}. 👇\n\n1. Start with the customer problem, not the feature.\n2. Measure one metric that matters.\n3. Share the wins *and* the lessons.\n\nWhat would you add? ${[...tags, "#marketing"].join(" ")}\n\n**Instagram**\n\n${cap(s)} ✨ Swipe to see how it works → Save this for later. ${[...tags, "#growth", "#smallbusiness"].join(" ")}\n\n**X**\n\n${cap(s)}. The short version: less busywork, better results. Thread 🧵 ${tags.slice(0, 2).join(" ")}`;
   }
   if (/ad copy|ad variation|headline|creative/.test(i)) {
     return `## Ad copy: ${cap(s)}\n\n| Angle | Headline | Primary text | CTA |\n|---|---|---|---|\n| Pain | Still doing it manually? | ${cap(s)} — automate the busywork and get hours back every week. | Start free |\n| Outcome | Results in days, not months | Teams using ${b.brand} launch faster and see results sooner. | See how |\n| Social proof | Trusted by growing teams | Join thousands of ${b.audience} already using ${b.brand}. | Join them |\n| Urgency | Offer ends Friday | ${cap(s)}. Don't miss this week's pricing. | Claim offer |\n| Simplicity | Set up in 10 minutes | No complex onboarding. Just connect and go. | Get started |\n\n**Testing plan:** run all five angles with equal budget for 5 days, then move 70% of spend to the top two by cost per acquisition.`;
-  }
-  if (/blog|article/.test(i)) {
-    return `# ${cap(s)}\n\n*For ${b.audience} who want results without adding headcount.*\n\nMarketing teams are being asked to do more with less. The good news: the right systems make that possible. In this guide we break down exactly how to approach ${s.toLowerCase()} — with practical steps you can apply this week.\n\n## Why it matters now\n\nBuyers research more channels than ever before they talk to sales. Consistent, useful content across those channels is what earns attention — and consistency is exactly what small teams struggle with.\n\n## A practical framework\n\n### 1. Start with one clear outcome\nPick a single metric — qualified leads, trial signups or revenue — and make every piece of work ladder up to it.\n\n### 2. Build a repeatable production system\nTemplates, a shared brand kit and an approval workflow turn one-off efforts into a machine that runs every week.\n\n### 3. Automate the handoffs\nThe biggest time sink is rarely the work itself — it's moving work between people and tools. Automate scheduling, routing and reporting.\n\n### 4. Review, learn, repeat\nHold a 30-minute weekly review. Keep what works, cut what doesn't, and document the learning.\n\n## Common mistakes to avoid\n\n- Chasing every channel at once instead of mastering two\n- Publishing without a distribution plan\n- Measuring vanity metrics instead of pipeline\n\n## Key takeaways\n\n- Focus on one outcome and measure it weekly\n- Systems beat heroics — templatize and automate\n- Small, consistent improvements compound\n\n**Ready to put this into practice?** Start your free ${b.brand} workspace and have your first campaign running today.`;
   }
   if (/report|analy|insight|recommend|performance/.test(i)) {
     return `## Performance analysis: ${cap(s)}\n\n### Executive summary\nOverall performance is trending positively, with growth concentrated in owned channels. Paid efficiency softened slightly and is the main area to optimize next period.\n\n### Key findings\n| Area | Observation | Implication |\n|---|---|---|\n| Traffic | Organic sessions up week over week | SEO investment is paying off |\n| Conversion | Landing page conversion below benchmark | Test headline and form length |\n| Email | Tuesday sends outperform other days | Consolidate sends to Tue/Thu |\n| Social | Short video drives 2× engagement | Shift creative mix toward video |\n\n### Recommendations (prioritized)\n1. **A/B test the primary landing page** — highest impact, low effort.\n2. **Reallocate 15% of paid budget** from the lowest-ROAS campaign to retargeting.\n3. **Double short-form video output** on Instagram and TikTok.\n4. **Launch a re-engagement sequence** for leads inactive 30+ days.\n\n### How to measure\nTrack conversion rate, cost per lead and pipeline influenced weekly; review results in 14 days.`;

@@ -151,3 +151,21 @@ export const NODE_LABELS: Record<WorkflowNodeType, { label: string; description:
   NOTIFY: { label: "Notify team", description: "Send an in-app notification" },
   GENERATE_REPORT: { label: "Generate report", description: "Create a performance report" },
 };
+
+/** Allowed lifecycle transitions (shared by API validation and UI menus). */
+export const CAMPAIGN_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
+  DRAFT: ["PLANNING", "ACTIVE", "ARCHIVED"],
+  PLANNING: ["DRAFT", "ACTIVE", "ARCHIVED"],
+  ACTIVE: ["PAUSED", "COMPLETED"],
+  PAUSED: ["ACTIVE", "COMPLETED", "ARCHIVED"],
+  COMPLETED: ["ARCHIVED", "ACTIVE"],
+  ARCHIVED: ["DRAFT"],
+};
+
+export const CONTENT_TRANSITIONS: Record<ContentStatus, ContentStatus[]> = {
+  DRAFT: ["IN_REVIEW", "APPROVED", "ARCHIVED"],
+  IN_REVIEW: ["DRAFT", "APPROVED"],
+  APPROVED: ["DRAFT", "PUBLISHED", "ARCHIVED"],
+  PUBLISHED: ["DRAFT", "ARCHIVED"],
+  ARCHIVED: ["DRAFT"],
+};

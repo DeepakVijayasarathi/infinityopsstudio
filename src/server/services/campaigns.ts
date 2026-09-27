@@ -10,6 +10,9 @@ import { emitEvent } from "./events";
 import { notify } from "./notifications";
 import { enqueue } from "../queue";
 import { getPlan, withinLimit } from "@/config/plans";
+import { CAMPAIGN_TRANSITIONS } from "@/lib/constants";
+
+export { CAMPAIGN_TRANSITIONS };
 
 export type CampaignInput = {
   name: string;
@@ -26,15 +29,6 @@ export type CampaignInput = {
   ownerId?: string | null;
 };
 
-/** Allowed status transitions — keeps the lifecycle consistent. */
-export const CAMPAIGN_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
-  DRAFT: ["PLANNING", "ACTIVE", "ARCHIVED"],
-  PLANNING: ["DRAFT", "ACTIVE", "ARCHIVED"],
-  ACTIVE: ["PAUSED", "COMPLETED"],
-  PAUSED: ["ACTIVE", "COMPLETED", "ARCHIVED"],
-  COMPLETED: ["ARCHIVED", "ACTIVE"],
-  ARCHIVED: ["DRAFT"],
-};
 
 function validateDates(start?: Date | null, end?: Date | null) {
   if (start && end && end < start) throw badRequest("End date must be after the start date");

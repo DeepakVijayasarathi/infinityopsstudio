@@ -12,18 +12,14 @@ import { can } from "../tenant";
 import { paginated, pageArgs, orderBy, type PaginationInput } from "../pagination";
 import { emitEvent } from "./events";
 import { recordUsage } from "../billing/usage";
+import { CONTENT_TRANSITIONS } from "@/lib/constants";
+
+export { CONTENT_TRANSITIONS };
 
 const VERSION_INTERVAL_MS = 10 * 60 * 1000;
 
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
-export const CONTENT_TRANSITIONS: Record<ContentStatus, ContentStatus[]> = {
-  DRAFT: ["IN_REVIEW", "APPROVED", "ARCHIVED"],
-  IN_REVIEW: ["DRAFT", "APPROVED"],
-  APPROVED: ["DRAFT", "PUBLISHED", "ARCHIVED"],
-  PUBLISHED: ["DRAFT", "ARCHIVED"],
-  ARCHIVED: ["DRAFT"],
-};
 
 export async function listContent(workspaceId: string, p: PaginationInput & { type?: ContentType; status?: ContentStatus; campaignId?: string }) {
   const where: Prisma.ContentWhereInput = {

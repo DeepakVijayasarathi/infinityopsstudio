@@ -7,6 +7,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Bell, CheckCheck } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { cn, timeAgo } from "@/lib/utils";
+import { TimeAgo } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 
 type N = { id: string; title: string; body: string | null; link: string | null; readAt: string | null; createdAt: string; type: string };
@@ -52,7 +53,7 @@ export function NotificationsBell() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium leading-snug">{n.title}</p>
                     {n.body && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>}
-                    <p className="mt-1 text-[11px] text-muted-foreground">{timeAgo(n.createdAt)}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground"><TimeAgo date={n.createdAt} /></p>
                   </div>
                 </div>
               );

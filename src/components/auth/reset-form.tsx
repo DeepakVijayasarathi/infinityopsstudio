@@ -34,7 +34,7 @@ export function ResetForm({ endpoint, title, description }: { endpoint: string; 
           </Button>
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+        <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
           {f.formError && <FormAlert>{f.formError}</FormAlert>}
           <Field label="New password" htmlFor="password" error={f.errors.password} hint="At least 8 characters with a letter and a number.">
             <Input {...f.bind("password")} type="password" autoComplete="new-password" autoFocus />

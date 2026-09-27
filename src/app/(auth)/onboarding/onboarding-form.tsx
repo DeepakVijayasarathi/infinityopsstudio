@@ -23,7 +23,7 @@ export function OnboardingForm({ name }: { name: string }) {
     <div>
       <h1 className="text-2xl font-semibold tracking-tight">Set up your workspace</h1>
       <p className="mt-1 text-sm text-muted-foreground">Your AI workers use this to tailor every output.</p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+      <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
         {f.formError && <FormAlert>{f.formError}</FormAlert>}
         <Field label="Workspace name" htmlFor="name" error={f.errors.name}>
           <Input {...f.bind("name")} autoFocus />

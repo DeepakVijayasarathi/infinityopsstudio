@@ -33,7 +33,7 @@ export function ContactForm({ initialType }: { initialType: "SALES" | "SUPPORT" 
     );
   }
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6 card-shadow sm:p-8" noValidate>
+    <form method="post" onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6 card-shadow sm:p-8" noValidate>
       <div role="radiogroup" aria-label="Enquiry type" className="grid grid-cols-3 gap-2">
         {TYPES.map((t) => (
           <button

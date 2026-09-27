@@ -20,6 +20,8 @@ const daysAgo = (d: number, h = 10) => {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - d);
   date.setUTCHours(h, int(0, 59), 0, 0);
+  // Never produce timestamps in the future for "today".
+  if (d >= 0 && date.getTime() > Date.now()) return new Date(Date.now() - int(5, 240) * 60_000);
   return date;
 };
 const dayOnly = (d: number) => {

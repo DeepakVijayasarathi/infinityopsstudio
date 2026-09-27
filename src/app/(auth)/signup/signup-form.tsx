@@ -43,7 +43,7 @@ export function SignupForm({ inviteToken, email, plan }: { inviteToken?: string;
           <Divider label="or sign up with email" />
         </>
       )}
-      <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+      <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
         {f.formError && <FormAlert>{f.formError}</FormAlert>}
         <Field label="Full name" htmlFor="name" error={f.errors.name}>
           <Input {...f.bind("name")} autoComplete="name" placeholder="Alex Morgan" autoFocus />

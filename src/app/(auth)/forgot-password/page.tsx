@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
           If an account exists for <strong>{f.values.email}</strong>, a reset link is on its way. It expires in 1 hour.
         </FormAlert>
       ) : (
-        <form onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
+        <form method="post" onSubmit={onSubmit} className="mt-6 space-y-4" noValidate>
           {f.formError && <FormAlert>{f.formError}</FormAlert>}
           <Field label="Email" htmlFor="email" error={f.errors.email}>
             <Input {...f.bind("email")} type="email" autoComplete="email" autoFocus />
