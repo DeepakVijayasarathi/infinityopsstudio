@@ -50,7 +50,7 @@ Every response carries an `x-request-id` header; include it when reporting probl
 
 **Rate limits.** Sensitive endpoints have fixed-window limits keyed by user (or IP when signed out), backed by Redis with an in-memory fallback. Examples: login 20 / 15 min per IP plus account lockout after 5 failed passwords, signup 5 / hour, forgot-password 5 / 15 min, 2FA verification 10 / 15 min, invitations 30 / hour, inbound workflow webhooks 120 / min. AI usage is metered in credits against the workspace plan (`402` when exhausted).
 
-**Streaming.** AI generation endpoints (`POST /content/generate`, `POST /content/inline`, `POST /workers/:id/chat`, `POST /email/writer`) respond with Server-Sent Events:
+**Streaming.** AI generation endpoints (`POST /content/generate`, `POST /content/inline`, `POST /workers/:id/chat`, `POST /email/writer`) respond with Server-Sent Events. `POST /campaigns/autopilot` streams `step` events (`{key, label, status, detail, href}`) followed by `done` (`{campaignId, href, summary}`):
 
 ```
 event: meta   data: {"model":"claude-sonnet-5","provider":"anthropic","label":"Claude Sonnet 5"}
@@ -88,7 +88,7 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 
 ## Endpoints
 
-157 route handlers. *Access* lists the permission required, or who may call it.
+166 route handlers. *Access* lists the permission required, or who may call it.
 
 ### System
 
@@ -167,6 +167,13 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | GET | `/api/v1/ai/models` | signed-in user |
 | GET | `/api/v1/ai/usage` | `analytics:read` |
 
+### Copilot
+
+| Method | Path | Access |
+|---|---|---|
+| POST | `/api/v1/copilot` | workspace member |
+| POST | `/api/v1/copilot/execute` | per action (checked on execution) |
+
 ### Campaigns
 
 | Method | Path | Access |
@@ -181,6 +188,7 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | POST | `/api/v1/campaigns/:id/strategy/tasks` | `campaigns:write` |
 | POST | `/api/v1/campaigns/:id/tasks` | `campaigns:write` |
 | PATCH, DELETE | `/api/v1/campaigns/:id/tasks/:taskId` | `campaigns:write` |
+| POST | `/api/v1/campaigns/autopilot` | `campaigns:write` |
 
 ### Content Studio
 
@@ -252,6 +260,7 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | GET, PATCH, DELETE | `/api/v1/leads/:id` | `leads:delete`, `leads:read`, `leads:write` |
 | POST | `/api/v1/leads/:id/notes` | `leads:write` |
 | POST | `/api/v1/leads/:id/resubscribe` | `email:send` |
+| GET | `/api/v1/leads/:id/score` | `leads:read` |
 | POST | `/api/v1/leads/:id/tasks` | `leads:write` |
 | PATCH, DELETE | `/api/v1/leads/:id/tasks/:taskId` | `leads:write` |
 | POST | `/api/v1/leads/bulk` | `leads:write` |
@@ -289,11 +298,26 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 | POST | `/api/v1/analytics/reports` | `analytics:read` |
 | GET | `/api/v1/analytics/timeseries` | `analytics:read` |
 
+### Smart insights
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/v1/insights` | `analytics:read` |
+| POST | `/api/v1/insights/weekly` | `analytics:read` |
+
 ### Brand Kit
 
 | Method | Path | Access |
 |---|---|---|
 | GET, PUT | `/api/v1/brand` | `brand:manage` |
+| POST | `/api/v1/brand/autofill` | `brand:manage` |
+
+### Templates
+
+| Method | Path | Access |
+|---|---|---|
+| GET | `/api/v1/templates` | workspace member |
+| POST | `/api/v1/templates/apply` | per template kind |
 
 ### Integrations
 

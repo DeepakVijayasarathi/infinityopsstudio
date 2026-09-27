@@ -111,6 +111,28 @@ function document(b: Brief): string {
   if (/caption|social|\bposts?\b/.test(i)) {
     const STOP = new Set(["about", "their", "there", "these", "those", "which", "while", "where", "your", "with", "from", "that", "this", "what", "when", "signs", "costing", "money", "just", "into", "over"]);
     const tags = [...new Set(s.toLowerCase().match(/[a-z]{5,}/g) ?? [])].filter((w) => !STOP.has(w)).slice(0, 3).map((w) => `#${w}`);
+    // "Write N distinct <platform> posts … separate posts with ===": N separate posts for one platform.
+    const batch = i.match(/write (\d+) distinct ([a-z ()]+?) (?:social )?posts/);
+    if (batch && /separate posts with/.test(i)) {
+      const n = Math.min(6, Math.max(1, Number(batch[1])));
+      const short = /\bx\b|twitter/.test(batch[2]!);
+      const topic = cap(s);
+      const variants = [
+        `${topic}. Most teams overcomplicate this — here's the simple version for ${b.audience}. 👇\n\n→ Start with the problem, not the feature\n→ Measure one number that matters\n→ Share results, not promises\n\nWhat would you add?`,
+        `Quick question for ${b.audience}: how much time did busywork cost you last week?\n\n${topic} is how ${b.brand} gives those hours back. See how it works — link in comments.`,
+        `3 things we learned while building this: ${s.toLowerCase()}.\n\n1. Small, consistent wins beat big launches\n2. Customers tell you what to build next\n3. Simple tools get used\n\nSave this for later.`,
+        `Behind the scenes: ${s.toLowerCase()}. Built with feedback from teams like yours. Want an early look? Reply "demo" and we'll set it up.`,
+        `Myth: getting better results means more work.\nReality: the right system does the heavy lifting.\n\n${topic} — here's the proof.`,
+        `${topic}: the one-minute version. Less manual work, faster results, clearer numbers. Try it this week and tell us what you think.`,
+      ];
+      return variants
+        .slice(0, n)
+        .map((v) => {
+          const text = short ? `${v.split("\n")[0]!.slice(0, 200)}` : v;
+          return `${text} ${[...tags.slice(0, short ? 2 : 3), "#marketing"].join(" ")}`;
+        })
+        .join("\n\n===\n\n");
+    }
     return `## Social posts: ${cap(s)}\n\n**LinkedIn**\n\n${cap(s)}. Here's what we learned along the way — and what it means for ${b.audience}. 👇\n\n1. Start with the customer problem, not the feature.\n2. Measure one metric that matters.\n3. Share the wins *and* the lessons.\n\nWhat would you add? ${[...tags, "#marketing"].join(" ")}\n\n**Instagram**\n\n${cap(s)} ✨ Swipe to see how it works → Save this for later. ${[...tags, "#growth", "#smallbusiness"].join(" ")}\n\n**X**\n\n${cap(s)}. The short version: less busywork, better results. Thread 🧵 ${tags.slice(0, 2).join(" ")}`;
   }
   if (/ad copy|ad variation|headline|creative/.test(i)) {

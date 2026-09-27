@@ -29,21 +29,59 @@ export type LeadInput = {
 const SOURCE_POINTS: Record<LeadSource, number> = { REFERRAL: 20, EVENT: 15, WEBSITE: 12, EMAIL: 10, ADS: 8, SOCIAL: 8, API: 5, MANUAL: 5, IMPORT: 3 };
 const STATUS_POINTS: Record<LeadStatus, number> = { NEW: 0, CONTACTED: 10, QUALIFIED: 25, PROPOSAL: 35, WON: 40, LOST: 0 };
 
-/** Rule-based lead score (0–100): fit + source + stage + engagement. */
-export function scoreLead(lead: { email?: string | null; phone?: string | null; company?: string | null; jobTitle?: string | null; website?: string | null; source: LeadSource; status: LeadStatus }, engagement = { opens: 0, clicks: 0, activities: 0 }): number {
-  let score = 0;
-  if (lead.email) score += 8;
-  if (lead.phone) score += 4;
-  if (lead.company) score += 6;
-  if (lead.website) score += 2;
+type ScoreInput = { email?: string | null; phone?: string | null; company?: string | null; jobTitle?: string | null; website?: string | null; source: LeadSource; status: LeadStatus };
+export type ScoreFactor = { label: string; points: number; max: number };
+
+/** The factors behind a lead's score, so the UI can explain it. Points always sum to the score (before clamping). */
+export function scoreBreakdown(lead: ScoreInput, engagement = { opens: 0, clicks: 0, activities: 0 }): ScoreFactor[] {
   const title = (lead.jobTitle ?? "").toLowerCase();
-  if (/\b(ceo|cto|cmo|coo|founder|owner|president|vp|vice president|head|director|chief)\b/.test(title)) score += 15;
-  else if (/\b(manager|lead|principal)\b/.test(title)) score += 8;
-  else if (title) score += 3;
-  score += SOURCE_POINTS[lead.source];
-  score += STATUS_POINTS[lead.status];
-  score += Math.min(10, engagement.opens * 2) + Math.min(10, engagement.clicks * 4) + Math.min(5, engagement.activities);
-  return Math.max(0, Math.min(100, score));
+  const seniority = /\b(ceo|cto|cmo|coo|founder|owner|president|vp|vice president|head|director|chief)\b/.test(title)
+    ? 15
+    : /\b(manager|lead|principal)\b/.test(title)
+      ? 8
+      : title
+        ? 3
+        : 0;
+  const contact = (lead.email ? 8 : 0) + (lead.phone ? 4 : 0);
+  const company = (lead.company ? 6 : 0) + (lead.website ? 2 : 0);
+  return [
+    { label: "Contact details", points: contact, max: 12 },
+    { label: "Company info", points: company, max: 8 },
+    { label: lead.jobTitle ? `Seniority (${lead.jobTitle})` : "Seniority", points: seniority, max: 15 },
+    { label: `Source: ${lead.source.toLowerCase()}`, points: SOURCE_POINTS[lead.source], max: 20 },
+    { label: `Pipeline stage: ${lead.status.toLowerCase()}`, points: STATUS_POINTS[lead.status], max: 40 },
+    { label: `Email opens (${engagement.opens})`, points: Math.min(10, engagement.opens * 2), max: 10 },
+    { label: `Email clicks (${engagement.clicks})`, points: Math.min(10, engagement.clicks * 4), max: 10 },
+    { label: `Calls, meetings & notes (${engagement.activities})`, points: Math.min(5, engagement.activities), max: 5 },
+  ];
+}
+
+/** Rule-based lead score (0–100): fit + source + stage + engagement. */
+export function scoreLead(lead: ScoreInput, engagement = { opens: 0, clicks: 0, activities: 0 }): number {
+  const total = scoreBreakdown(lead, engagement).reduce((a, f) => a + f.points, 0);
+  return Math.max(0, Math.min(100, total));
+}
+
+/** Score factors plus a plain-language next step for a stored lead. */
+export async function explainLeadScore(workspaceId: string, leadId: string) {
+  const lead = await getLead(workspaceId, leadId);
+  const [opens, clicks, activities] = await Promise.all([
+    db.emailSend.count({ where: { leadId, openedAt: { not: null } } }),
+    db.emailSend.count({ where: { leadId, clickedAt: { not: null } } }),
+    db.leadActivity.count({ where: { leadId, type: { in: ["NOTE", "CALL", "MEETING"] } } }),
+  ]);
+  const factors = scoreBreakdown(lead, { opens, clicks, activities });
+  const score = scoreLead(lead, { opens, clicks, activities });
+  const days = lead.lastContactedAt ? Math.floor((Date.now() - lead.lastContactedAt.getTime()) / 86_400_000) : null;
+  let nextStep: string;
+  if (lead.status === "WON" || lead.status === "LOST") nextStep = lead.status === "WON" ? "Won — ask for a referral or case study." : "Closed lost — add to a re-engagement sequence in 90 days.";
+  else if (lead.status === "PROPOSAL") nextStep = days !== null && days < 7 ? "Proposal out — confirm the decision timeline and handle open objections." : "Proposal is going cold — follow up today with a short, specific next step.";
+  else if (score >= 70 && (days === null || days >= 3)) nextStep = `Hot lead${days === null ? " never contacted" : ` last contacted ${days} days ago`} — call or email today.`;
+  else if (score >= 70) nextStep = "Hot lead — move toward a proposal.";
+  else if (!lead.email && !lead.phone) nextStep = "Missing contact details — find an email or phone number to raise the score.";
+  else if (score >= 40) nextStep = "Warm — nurture with a relevant case study or invite to a demo.";
+  else nextStep = "Early stage — add to a nurture email sequence.";
+  return { score, factors, nextStep };
 }
 
 async function recalcScore(leadId: string) {

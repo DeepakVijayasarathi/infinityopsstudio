@@ -63,4 +63,9 @@ describe("local demo provider", () => {
     }
     expect(streamed).toBe(r.text);
   });
+
+  it("writes the requested number of separate posts for batch requests", async () => {
+    const r = await gen("Write 3 distinct LinkedIn social posts for this campaign.\nTopic: our spring launch\nSeparate posts with a line containing only ===");
+    expect(r.text.split(/\n\s*===\s*\n/)).toHaveLength(3);
+  });
 });

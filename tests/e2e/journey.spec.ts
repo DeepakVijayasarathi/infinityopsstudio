@@ -70,6 +70,42 @@ test("create an automation", async () => {
   await expect(page.getByLabel("Automation name")).toHaveValue("Welcome new leads");
 });
 
+test("Copilot answers questions and drafts posts on approval", async () => {
+  await page.goto("/app");
+  await page.getByRole("button", { name: "Open Copilot" }).click();
+  await page.getByRole("button", { name: "What needs my approval?" }).click();
+  await expect(page.getByText(/waiting|Nothing is waiting/).first()).toBeVisible();
+  await page.getByLabel("Message Copilot").fill("Draft 2 LinkedIn posts about our autumn menu");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Approve" }).last().click();
+  await expect(page.getByText("Drafted 2 posts")).toBeVisible({ timeout: 60_000 });
+  await page.keyboard.press("Escape");
+});
+
+test("AI campaign autopilot builds a full draft campaign", async () => {
+  await page.goto("/app/campaigns");
+  await page.getByRole("button", { name: "AI campaign" }).click();
+  await page.getByLabel("Campaign goal").fill("Get 80 pre-orders for our autumn menu in 2 weeks");
+  await page.getByRole("button", { name: "Build campaign" }).click();
+  await expect(page.getByRole("link", { name: "Open campaign" })).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByText(/Everything is a draft for your review/)).toBeVisible();
+  await page.getByRole("link", { name: "Open campaign" }).click();
+  await page.waitForURL(/\/app\/campaigns\/[a-z0-9]+$/);
+});
+
+test("templates and guided setup", async () => {
+  await page.goto("/app/templates?tab=emails");
+  await page.getByRole("button", { name: "Add to my templates" }).first().click();
+  await page.waitForURL(/\/app\/email/);
+  await page.goto("/app/setup");
+  await page.getByLabel("Industry").fill("Coffee roasting");
+  await page.getByRole("button", { name: "Save and continue" }).click();
+  await expect(page.getByText("Launch your first campaign")).toBeVisible();
+  await page.getByRole("button", { name: "Skip for now" }).click();
+  await page.getByRole("button", { name: /Add 1 automation/ }).click();
+  await expect(page.getByText("You're all set")).toBeVisible();
+});
+
 test("view analytics", async () => {
   await page.goto("/app/analytics");
   await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();

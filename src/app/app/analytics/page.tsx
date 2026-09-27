@@ -4,6 +4,8 @@ import { aiUsageAnalytics, byChannel, campaignTable, emailAnalytics, leadFunnel,
 import { socialAnalytics } from "@/server/services/social";
 import { PageHeader } from "@/components/ui/page-header";
 import { AnalyticsView } from "./analytics-view";
+import { workspaceInsights } from "@/server/services/insights";
+import { InsightsCard } from "@/components/app/insights-card";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -14,7 +16,8 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const range = resolveRange({ days, from: sp.from, to: sp.to });
   const ws = ctx.workspace.id;
   const spanDays = Math.max(1, Math.round((range.to.getTime() - range.from.getTime()) / 86400_000));
-  const [ov, series, channels, campaigns, funnel, email, ai, social] = await Promise.all([
+  const [insights, ov, series, channels, campaigns, funnel, email, ai, social] = await Promise.all([
+    workspaceInsights(ws),
     overview(ws, range),
     timeseries(ws, range),
     byChannel(ws, range),
@@ -27,6 +30,9 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Analytics" description="Campaign, channel, lead, email, social and AI performance in one place." />
+      <div className="mb-6">
+        <InsightsCard insights={insights} limit={3} />
+      </div>
       <AnalyticsView
         range={{ from: range.from.toISOString(), to: range.to.toISOString(), days: sp.from ? null : days }}
         data={JSON.parse(JSON.stringify({ ov, series, channels, campaigns, funnel, email, ai, social }))}

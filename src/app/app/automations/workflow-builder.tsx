@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/misc";
 import { EmptyState } from "@/components/ui/states";
 import { DateText } from "@/components/ui/time";
 import { useConfirm } from "@/components/ui/confirm";
+import { AUTOMATION_TEMPLATES as TEMPLATES } from "@/config/templates";
 
 type Cfg = Record<string, unknown>;
 type Node = { type: WorkflowNodeType; label: string; config: Cfg };
@@ -61,36 +62,6 @@ const DEFAULTS: Record<WorkflowNodeType, Cfg> = {
   GENERATE_REPORT: { days: 30 },
 };
 
-const TEMPLATES: { name: string; description: string; trigger: WorkflowTrigger; triggerConfig?: Cfg; nodes: Node[] }[] = [
-  {
-    name: "New lead → qualify → welcome → assign worker",
-    description: "Qualify inbound leads, send a welcome email and ask Nova for an account plan.",
-    trigger: "LEAD_CREATED",
-    nodes: [
-      { type: "CONDITION", label: "Score is at least 30", config: { field: "lead.score", operator: "gte", value: "30" } },
-      { type: "UPDATE_LEAD", label: "Mark as contacted", config: { status: "CONTACTED", addTag: "auto-qualified" } },
-      { type: "SEND_EMAIL", label: "Welcome email", config: DEFAULTS.SEND_EMAIL },
-      { type: "ASSIGN_WORKER", label: "Account plan from Nova", config: DEFAULTS.ASSIGN_WORKER },
-    ],
-  },
-  {
-    name: "New blog → social posts → schedule",
-    description: "Turn every published article into a LinkedIn post awaiting approval.",
-    trigger: "CONTENT_PUBLISHED",
-    nodes: [
-      { type: "AI_ACTION", label: "Draft social posts", config: { workerKey: "social-media-manager", capability: "post-creation", instructions: "{{payload.title}}", saveAsContent: false } },
-      { type: "CREATE_SOCIAL_POST", label: "Queue LinkedIn post", config: { platform: "LINKEDIN", text: "New on the blog: {{payload.title}}", scheduleInHours: 24 } },
-    ],
-  },
-  { name: "Campaign completed → performance report", description: "Generate an executive report the moment a campaign ends.", trigger: "CAMPAIGN_COMPLETED", nodes: [{ type: "GENERATE_REPORT", label: "Generate report", config: { days: 90 } }, { type: "NOTIFY", label: "Notify team", config: { title: "Report ready for {{payload.name}}", body: "" } }] },
-  {
-    name: "Low engagement → AI optimization",
-    description: "When 7-day social engagement drops under 2%, ask Apex for fixes.",
-    trigger: "ENGAGEMENT_LOW",
-    triggerConfig: { threshold: 0.02 },
-    nodes: [{ type: "AI_ACTION", label: "Optimization ideas", config: { workerKey: "growth-strategist", capability: "conversion-ideas", instructions: "Engagement rate is {{payload.engagementRate}}. Suggest fixes.", saveAsContent: true } }],
-  },
-];
 
 export function WorkflowBuilder({ workflow, executions, workers, capabilities, canWrite }: { workflow: Workflow | null; executions: Execution[]; workers: { key: string; name: string; title: string }[]; capabilities: Record<string, { key: string; label: string }[]>; canWrite: boolean }) {
   const router = useRouter();

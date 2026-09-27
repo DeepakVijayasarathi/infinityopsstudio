@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Progress } from "@/components/ui/misc";
+import { mergeDraft, WebsiteAutofill } from "@/components/app/website-autofill";
 
 type Kit = {
   companyName: string;
@@ -116,6 +117,17 @@ export function BrandForm({ kit, completeness, canEdit }: { kit: Kit; completene
   return (
     <form onSubmit={save} className="grid gap-6 xl:grid-cols-[1fr_340px]">
       <div className="space-y-4">
+        {canEdit && (
+          <Card className="border-primary/25">
+            <CardHeader>
+              <CardTitle>Fill this in automatically</CardTitle>
+              <CardDescription>Enter your website and we&apos;ll draft your company details. Nothing is saved until you click Save.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WebsiteAutofill initialUrl={v.website ?? ""} onDraft={(d) => setV((x) => mergeDraft(x, d))} />
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader>
             <CardTitle>Company</CardTitle>

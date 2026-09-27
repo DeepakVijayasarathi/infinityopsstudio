@@ -14,6 +14,8 @@ export const NOTIFICATION_TYPES = {
   "usage.warning": { label: "Usage limit warning", emailDefault: true },
   "social.failed": { label: "Social post failed", emailDefault: true },
   "workspace.invite": { label: "Workspace membership", emailDefault: true },
+  "insight.alert": { label: "Performance alerts (unusual drops)", emailDefault: true },
+  "report.weekly": { label: "Weekly insights report", emailDefault: false },
 } as const;
 
 export type NotificationType = keyof typeof NOTIFICATION_TYPES;

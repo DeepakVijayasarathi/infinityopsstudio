@@ -37,6 +37,8 @@ Services and API route handlers run against a real PostgreSQL database with the 
 - **AI workers**: a task flows through the queue to `AWAITING_APPROVAL` with an `AIRequest` row and credit usage, then approval and saving to Content Studio; inactive workers are refused.
 - **Billing**: upgrades apply immediately with an invoice; downgrades are scheduled for period end.
 - **Automations**: a `LEAD_CREATED` workflow with a condition and a lead update runs for matching leads and stops for others.
+- **Copilot**: data answers (hot leads, approvals, performance), request → action planning, permission-filtered proposals, execution of approved actions with permission re-checks, capability matching.
+- **Autopilot, insights and templates**: a full draft campaign from one goal (strategy, tasks, blog, scheduled social drafts, email, disabled automation) and its streamed progress; hot-lead and anomaly insights, score explanations, the once-per-week digest; campaign, email and automation templates.
 - **API layer**: `401` shape for anonymous calls, `422` validation errors, workspace-scoped create and list, `403` for a foreign `x-workspace-id`, health endpoint.
 
 ### Setup
@@ -54,7 +56,7 @@ Before the run, `tests/global-setup.ts` applies migrations with `prisma migrate 
 Playwright drives Chromium through real user journeys against a production build:
 
 - `public.spec.ts` — marketing navigation, pricing, blog article, redirect of protected pages to login, health endpoints.
-- `journey.spec.ts` — one new customer, in order: sign up → create a campaign → generate and save content → assign a task to an AI worker → build an automation → open analytics → upgrade the plan (with invoice).
+- `journey.spec.ts` — one new customer, in order: sign up → create a campaign → generate and save content → assign a task to an AI worker → build an automation → ask Copilot and approve drafted posts → build a campaign with the AI autopilot → use a template and complete guided setup → open analytics → upgrade the plan (with invoice).
 
 ```bash
 npm run build

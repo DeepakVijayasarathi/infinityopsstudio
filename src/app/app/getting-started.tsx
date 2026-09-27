@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, Circle, Rocket, X } from "lucide-react";
+import { CheckCircle2, Circle, Rocket, Wand2, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/misc";
 
@@ -40,13 +40,19 @@ export function GettingStarted({ steps, forceOpen }: { steps: Step[]; forceOpen?
           <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
             <Rocket className="size-5" />
           </span>
-          <div>
+          <div className="flex-1">
             <h2 className="font-semibold">Get set up in 5 steps</h2>
             <p className="text-sm text-muted-foreground">
               {done} of {steps.length} complete
             </p>
           </div>
+          <Link href="/app/setup" className="mr-8 hidden items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 sm:inline-flex">
+            <Wand2 className="size-4" aria-hidden /> Guided setup
+          </Link>
         </div>
+        <Link href="/app/setup" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary sm:hidden">
+          <Wand2 className="size-4" aria-hidden /> Start guided setup
+        </Link>
         <Progress value={(done / steps.length) * 100} className="mt-4" />
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((s) => (

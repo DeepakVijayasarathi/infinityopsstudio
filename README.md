@@ -11,13 +11,17 @@ Built by [Infinity Uniquers](https://infinityuniquers.com).
 | **Public website** | Home, features, pricing, about, contact, blog, privacy, terms · SEO metadata, sitemap, robots, dynamic Open Graph images |
 | **Authentication** | Email + password, Google OAuth, email verification, password reset, account recovery, TOTP two-factor with recovery codes, refresh-token rotation with reuse detection, login lockout, rate limiting |
 | **Workspaces** | Multiple workspaces per user, invitations, roles (Owner, Admin, Manager, Member, Viewer) with 32 fine-grained permissions |
+| **AI Copilot** | Assistant on every page (⌘J): answers questions from live workspace data ("which leads should I call?", "how are we doing?") and proposes actions — campaigns, content, social drafts, leads, worker tasks — that run only after you approve |
+| **One-click AI campaign** | Describe a goal; the AI team builds the campaign, strategy and tasks, a blog post, scheduled social drafts, an email and a follow-up automation, with live progress. Everything is a draft for review |
+| **Smart insights** | Anomaly detection (sudden drops and spikes), week-over-week changes, hot leads needing follow-up, stalled deals, budget pacing, overdue approvals, failed posts and low open rates — each with a next step. Daily alerts and an automatic weekly AI report |
+| **Setup wizard & templates** | Guided 5-minute setup that drafts your Brand Kit from your website, plus campaign, automation and email templates you can use in one click |
 | **AI workers** | Nova (strategy), Quill (content), Pulse (social), Atlas (SEO), Echo (email), Blaze (ads), Lens (analytics) and Apex (growth) — task queue, approvals, chat, per-worker configuration and usage |
 | **Campaigns** | Lifecycle with validated status transitions, approvals, AI strategy generation, tasks, budget and KPI tracking, performance charts |
 | **Content Studio** | Streaming AI generator (blog posts, social posts, ads, landing pages, emails, product descriptions, SEO meta), rich editor with inline AI actions, version history and restore, sharing links, export (Markdown / HTML / text), internal-link suggestions |
 | **Social** | Composer with per-platform previews, calendar, approvals, publishing to LinkedIn / X / Facebook / Instagram (or manual publishing), caption and hashtag AI, analytics |
 | **SEO** | Projects, live page audits (16 checks), keyword tracking and AI keyword suggestions, competitor notes, opportunities, PDF reports |
 | **Email** | Templates, segments, campaigns and sequences, AI writer, test sends, scheduling, open / click tracking, one-click unsubscribe (RFC 8058) |
-| **Leads & CRM** | List and pipeline views, scoring, activities, notes, tasks, CSV import / export, bulk actions |
+| **Leads & CRM** | List and pipeline views, explainable scoring ("why this score" and the next best step), activities, notes, tasks, CSV import / export, bulk actions |
 | **Automations** | Visual builder with 10 step types (condition, delay, AI action, assign worker, email, social post, update lead, webhook, notify, report) and 8 triggers, test runs, execution logs |
 | **Analytics** | Traffic, leads, engagement, conversions, channel mix, campaign table, email and AI usage, CSV export, PDF reports |
 | **Brand Kit** | Voice, audience, USPs, do's and don'ts, colours, logos — injected into every AI request |
@@ -118,7 +122,7 @@ This starts PostgreSQL, Redis, a one-off `migrate` job (applies migrations and s
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) — components, request flow, background jobs
-- [API](docs/API.md) — conventions and all 157 endpoints
+- [API](docs/API.md) — conventions and all 166 endpoints
 - [Database](docs/DATABASE.md) — schema, tenancy, indexes, migrations
 - [AI architecture](docs/AI_ARCHITECTURE.md) — providers, models, prompts, cost tracking
 - [Environment](docs/ENVIRONMENT.md) — every configuration variable

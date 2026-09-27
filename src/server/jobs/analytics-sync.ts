@@ -2,6 +2,7 @@ import { db } from "../db";
 import { logger } from "../logger";
 import { emitEvent } from "../services/events";
 import { integrationCredentials } from "../services/integrations";
+import { alertOnAnomalies, weeklyDigest } from "../services/insights";
 
 const startOfDay = (d = new Date()) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
@@ -68,5 +69,13 @@ export async function syncWorkspaceAnalytics(workspaceId: string) {
         await emitEvent(workspaceId, "ENGAGEMENT_LOW", { engagementRate: Number(rate.toFixed(4)), threshold, posts: week._count });
       }
     }
+  }
+
+  // Smart insights: daily-deduplicated anomaly alerts, and one digest per ISO week (first sync of the week).
+  try {
+    await alertOnAnomalies(workspaceId);
+    await weeklyDigest(workspaceId);
+  } catch (err) {
+    logger.warn("Insights job failed", { err, workspaceId });
   }
 }

@@ -32,7 +32,7 @@ src/
     (auth)/          login, signup, two-factor, password reset, recovery, verify, invite, onboarding
     app/             the product (/app/*): one folder per module
     admin/           platform administration (/admin/*), super admins only
-    api/v1/          REST API (157 route handlers), api/health, api/ready
+    api/v1/          REST API (166 route handlers), api/health, api/ready
     og/  share/  unsubscribe/  robots.ts  sitemap.ts
   components/        ui/ (design system), charts/, app/ (shell), marketing/, auth/
   config/            plans, permissions and roles, AI worker definitions, site metadata
@@ -89,6 +89,13 @@ The worker (`npm run worker`) registers a repeatable `tick` job every 60 seconds
 ## Domain events and automations
 
 Services emit domain events (`emitEvent`) such as `LEAD_CREATED`, `LEAD_STATUS_CHANGED`, `CONTENT_PUBLISHED`, `CAMPAIGN_COMPLETED` and `ENGAGEMENT_LOW`. Enabled workflows listening to that trigger (after their trigger filters) get a `WorkflowExecution`, which the `workflows` queue runs step by step. `DELAY` steps park the execution in `WAITING` with a resume time that the scheduler picks up; `CONDITION` steps stop the run when false. Every step appends to the execution log shown in the builder.
+
+## Copilot, autopilot and insights
+
+- **Copilot** (`services/copilot.ts`, `components/app/copilot.tsx`): `POST /copilot` returns a Markdown reply plus proposed actions validated against a zod schema; `POST /copilot/execute` runs one approved action after re-checking the member's permission. Workspace questions (hot leads, approvals, performance, upcoming posts, campaigns, next steps) are answered from live queries. With a real model the model plans the reply and actions from a workspace snapshot; with the offline demo provider a rule-based planner handles the same requests.
+- **Campaign autopilot** (`services/autopilot.ts`): an async generator that creates the campaign, then strategy and tasks, blog post, per-platform social drafts spread over the campaign dates, an email draft and a disabled follow-up automation. `POST /campaigns/autopilot` streams each step over SSE; failures in one step don't stop the others, and nothing is published or sent.
+- **Insights** (`services/insights.ts`): rule-based signals from `MetricDaily` (3-day vs 14-day anomaly test, week-over-week change), leads, campaigns, approvals, social and email. The hourly analytics job sends each anomaly alert at most once a day and writes one AI weekly digest per ISO week.
+- **Templates** (`config/templates.ts`) and **Brand autofill** (`services/brand-autofill.ts`, SSRF-safe fetch of the user's site, deterministic metadata extraction plus optional AI inference with a real model).
 
 ## AI
 

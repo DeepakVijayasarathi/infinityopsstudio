@@ -239,10 +239,9 @@ export async function reviewCampaign(ctx: WorkspaceContext, id: string, decision
 
 // ─── AI strategy ───
 
-export async function generateStrategy(ctx: WorkspaceContext, id: string, extraInstructions?: string) {
-  const c = await getCampaign(ctx.workspace.id, id);
-  const strategist = await db.aIWorker.findFirst({ where: { workspaceId: ctx.workspace.id, key: "marketing-strategist" } });
-  const prompt = `Create a complete campaign strategy.
+/** The strategy brief sent to the Marketing Strategist (shared by the streaming UI and the autopilot). */
+export function strategyPrompt(c: { name: string; description: string | null; objective: string; targetAudience: string | null; budgetCents: number; currency: string; startDate: Date | null; endDate: Date | null; channels: string[] }, extraInstructions?: string) {
+  return `Create a complete campaign strategy.
 
 Campaign: ${c.name}
 Description: ${c.description ?? "n/a"}
@@ -254,6 +253,12 @@ Channels: ${c.channels.join(", ") || "recommend the best channels"}
 ${extraInstructions ? `Additional instructions: ${extraInstructions}` : ""}
 
 Include: executive summary, audience insight, core message and 3 supporting messages, channel plan with budget split, week-by-week timeline, content deliverables checklist, KPIs with targets, and risks.`;
+}
+
+export async function generateStrategy(ctx: WorkspaceContext, id: string, extraInstructions?: string) {
+  const c = await getCampaign(ctx.workspace.id, id);
+  const strategist = await db.aIWorker.findFirst({ where: { workspaceId: ctx.workspace.id, key: "marketing-strategist" } });
+  const prompt = strategyPrompt(c, extraInstructions);
 
   return streamText(
     {

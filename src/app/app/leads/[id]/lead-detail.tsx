@@ -17,6 +17,7 @@ import { Avatar } from "@/components/ui/misc";
 import { DateText, TimeAgo } from "@/components/ui/time";
 import { useConfirm } from "@/components/ui/confirm";
 import { LeadForm } from "../lead-form";
+import { ScoreExplainer } from "./score-explainer";
 
 type Activity = { id: string; type: string; content: string; createdAt: string; actor: { name: string } | null };
 type Lead = {
@@ -141,6 +142,7 @@ export function LeadDetail({ lead, members, campaigns, perms }: { lead: Lead; me
               <div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={lead.score} aria-valuemin={0} aria-valuemax={100}>
                 <div className="h-full rounded-full bg-primary" style={{ width: `${lead.score}%` }} />
               </div>
+              <ScoreExplainer leadId={lead.id} score={lead.score} />
               <dl className="space-y-3 text-sm">
                 {lead.email && (
                   <div className="flex items-center gap-2.5">

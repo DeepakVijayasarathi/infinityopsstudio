@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { CommandPaletteProvider } from "@/components/app/command-palette";
+import { CopilotProvider } from "@/components/app/copilot";
 import { SessionKeepAlive } from "@/components/app/session-keepalive";
 import { VerifyEmailBanner } from "@/components/app/verify-email-banner";
 import { DEFAULT_PLATFORM_SETTINGS, getSetting } from "@/server/settings";
@@ -33,23 +34,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppProvider value={value}>
       <CommandPaletteProvider>
-        <div className="flex min-h-dvh bg-background">
-          <Sidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Topbar />
-            {platform.maintenanceMessage && (
-              <div role="status" className="flex items-center gap-2 border-b border-info/25 bg-info/10 px-4 py-2 text-[13px] sm:px-6">
-                <Megaphone className="size-4 text-info" /> {platform.maintenanceMessage}
-              </div>
-            )}
-            {!ctx.user.emailVerifiedAt && <VerifyEmailBanner />}
-            <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-10">
-              {children}
-            </main>
+        <CopilotProvider>
+          <div className="flex min-h-dvh bg-background">
+            <Sidebar />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <Topbar />
+              {platform.maintenanceMessage && (
+                <div role="status" className="flex items-center gap-2 border-b border-info/25 bg-info/10 px-4 py-2 text-[13px] sm:px-6">
+                  <Megaphone className="size-4 text-info" /> {platform.maintenanceMessage}
+                </div>
+              )}
+              {!ctx.user.emailVerifiedAt && <VerifyEmailBanner />}
+              <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-10">
+                {children}
+              </main>
+            </div>
           </div>
-        </div>
-        <MobileNav />
-        <SessionKeepAlive />
+          <MobileNav />
+          <SessionKeepAlive />
+        </CopilotProvider>
       </CommandPaletteProvider>
     </AppProvider>
   );

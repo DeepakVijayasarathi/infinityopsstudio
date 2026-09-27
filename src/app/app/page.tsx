@@ -13,6 +13,10 @@ import { Button } from "@/components/ui/button";
 import { formatCompact, formatCurrency, formatMicros, formatNumber, formatPercent, timeAgo } from "@/lib/utils";
 import { OverviewCharts } from "./overview-charts";
 import { GettingStarted } from "./getting-started";
+import { workspaceInsights } from "@/server/services/insights";
+import { InsightsCard } from "@/components/app/insights-card";
+import { AutopilotButton } from "@/components/app/autopilot-dialog";
+import { can } from "@/server/tenant";
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -39,6 +43,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
     db.socialPost.findMany({ where: { workspaceId: ws, status: "SCHEDULED", scheduledAt: { gte: new Date() } }, orderBy: { scheduledAt: "asc" }, take: 4, select: { id: true, platform: true, text: true, scheduledAt: true } }),
   ]);
   const k = ov.kpis;
+  const insights = await workspaceInsights(ws);
   const { welcome } = await searchParams;
   const [taskApprovals, postApprovals, campaignApprovals, contentReviews] = approvals;
   const totalApprovals = approvals.reduce((a, b) => a + b, 0);
@@ -53,13 +58,11 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href="/app/analytics">View analytics</Link>
-            </Button>
-            <Button asChild>
               <Link href="/app/content/new">
                 <Sparkles /> Generate content
               </Link>
             </Button>
+            {can(ctx, "campaigns:write") && <AutopilotButton />}
           </>
         }
       />
@@ -87,6 +90,8 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         <StatCard label="Monthly spend" value={formatCurrency(k.monthlySpend.value, "USD", { compact: true })} current={k.monthlySpend.value} previous={k.monthlySpend.previous} icon={Coins} invert />
         <StatCard label="AI cost (30d)" value={formatMicros(k.aiUsage.costMicros)} icon={Sparkles} hint={<span>{formatCompact(k.aiUsage.tokens)} tokens</span>} />
       </div>
+
+      <InsightsCard insights={insights} />
 
       <OverviewCharts
         series={series.map((s) => ({ date: s.date, visits: s.visits, leads: s.leads, engagements: s.engagements, conversions: s.conversions }))}

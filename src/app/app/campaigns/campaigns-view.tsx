@@ -10,6 +10,7 @@ import { CAMPAIGN_OBJECTIVES, CAMPAIGN_STATUSES, humanize } from "@/lib/constant
 import { formatCompact, formatCurrency } from "@/lib/utils";
 import { DateText } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
+import { AutopilotButton } from "@/components/app/autopilot-dialog";
 import { StatusBadge, Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/states";
@@ -48,9 +49,12 @@ export function CampaignsView({ data, canWrite, openNew }: { data: { items: Row[
         ]}
       >
         {canWrite && (
-          <Button onClick={() => setOpen(true)} className="sm:ml-auto">
-            <Plus /> New campaign
-          </Button>
+          <div className="flex gap-2 sm:ml-auto">
+            <AutopilotButton variant="outline" />
+            <Button onClick={() => setOpen(true)}>
+              <Plus /> New campaign
+            </Button>
+          </div>
         )}
       </ListToolbar>
       <DataTable

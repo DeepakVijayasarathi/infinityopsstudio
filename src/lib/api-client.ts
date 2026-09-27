@@ -51,24 +51,26 @@ export type StreamHandlers = {
   signal?: AbortSignal;
 };
 
-/** POSTs JSON and consumes the Server-Sent Events stream produced by AI endpoints. */
-export async function streamAI(url: string, body: unknown, h: StreamHandlers): Promise<Response | null> {
+/**
+ * POSTs JSON and hands each Server-Sent Event to `onEvent`. Resolves when the stream ends.
+ * Resolves with the response (for headers) and an error message when the request or stream failed
+ * (aborts are not errors).
+ */
+export async function streamEvents(url: string, body: unknown, onEvent: (event: string, data: unknown) => void, signal?: AbortSignal): Promise<{ response: Response | null; error: string | null }> {
   let res: Response;
   try {
     res = await fetch(url.startsWith("/") ? url : `/api/v1/${url}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
-      signal: h.signal,
+      signal,
     });
   } catch (err) {
-    if ((err as Error).name !== "AbortError") h.onError?.("Network error. Check your connection and try again.");
-    return null;
+    return { response: null, error: (err as Error).name === "AbortError" ? null : "Network error. Check your connection and try again." };
   }
   if (!res.ok || !res.body) {
     const json = await res.json().catch(() => null);
-    h.onError?.(json?.error?.message ?? `Request failed (${res.status})`);
-    return null;
+    return { response: res, error: json?.error?.message ?? `Request failed (${res.status})` };
   }
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -84,16 +86,29 @@ export async function streamAI(url: string, body: unknown, h: StreamHandlers): P
         buffer = buffer.slice(sep + 2);
         const event = block.match(/^event: (.+)$/m)?.[1];
         const data = block.match(/^data: (.+)$/m)?.[1];
-        if (!event || !data) continue;
-        const parsed = JSON.parse(data);
-        if (event === "token") h.onToken(parsed.text);
-        else if (event === "meta") h.onMeta?.(parsed);
-        else if (event === "done") h.onDone?.(parsed);
-        else if (event === "error") h.onError?.(parsed.message);
+        if (event && data) onEvent(event, JSON.parse(data));
       }
     }
   } catch (err) {
-    if ((err as Error).name !== "AbortError") h.onError?.("The stream was interrupted.");
+    if ((err as Error).name !== "AbortError") return { response: res, error: "The stream was interrupted." };
   }
-  return res;
+  return { response: res, error: null };
+}
+
+/** POSTs JSON and consumes the Server-Sent Events stream produced by AI endpoints. */
+export async function streamAI(url: string, body: unknown, h: StreamHandlers): Promise<Response | null> {
+  const { response, error } = await streamEvents(
+    url,
+    body,
+    (event, data) => {
+      const d = data as Record<string, unknown>;
+      if (event === "token") h.onToken(d.text as string);
+      else if (event === "meta") h.onMeta?.(d as Parameters<NonNullable<StreamHandlers["onMeta"]>>[0]);
+      else if (event === "done") h.onDone?.(d as Parameters<NonNullable<StreamHandlers["onDone"]>>[0]);
+      else if (event === "error") h.onError?.(d.message as string);
+    },
+    h.signal,
+  );
+  if (error) h.onError?.(error);
+  return response;
 }
