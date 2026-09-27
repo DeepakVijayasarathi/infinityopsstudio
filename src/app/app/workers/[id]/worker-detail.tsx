@@ -7,7 +7,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { ArrowLeft, Bot, ListChecks, MessageSquare, Send, Settings2, Sparkles, Square, BarChart3 } from "lucide-react";
 import { api } from "@/lib/api-client";
-import { formatCompact, formatMicros, timeAgo } from "@/lib/utils";
+import { formatCompact, formatMicros } from "@/lib/utils";
 import { TimeAgo } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

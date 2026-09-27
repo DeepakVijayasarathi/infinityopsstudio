@@ -38,9 +38,12 @@ export type WorkflowNodeType = (typeof WORKFLOW_NODE_TYPES)[number];
 export type Tone = "neutral" | "info" | "success" | "warning" | "danger" | "brand";
 
 /** Human label from an enum value: "IN_REVIEW" → "In review" */
+const ACRONYMS = new Set(["seo", "ai", "api", "csv", "sms", "crm", "roas", "ctr"]);
+
 export function humanize(value: string): string {
-  const s = value.replace(/_/g, " ").toLowerCase();
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  const words = value.replace(/_/g, " ").toLowerCase().split(" ");
+  const out = words.map((w) => (ACRONYMS.has(w) ? w.toUpperCase() : w)).join(" ");
+  return out.charAt(0).toUpperCase() + out.slice(1);
 }
 
 export const PLATFORM_LABELS: Record<SocialPlatform, string> = {

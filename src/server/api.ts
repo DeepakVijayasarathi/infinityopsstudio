@@ -9,6 +9,7 @@ import { enforceRateLimit } from "./rate-limit";
 import { SESSION_COOKIE } from "./auth/cookies";
 import { needsRotation, rotateSession, validateSessionToken, type SessionUser, type ValidSession } from "./auth/session";
 import { assertCan, resolveWorkspace, type WorkspaceContext } from "./tenant";
+import { DEFAULT_PLATFORM_SETTINGS, getSetting } from "./settings";
 import type { Permission } from "@/config/permissions";
 
 type AuthMode = "public" | "user" | "workspace" | "admin";
@@ -136,6 +137,12 @@ export function route<B = undefined, Q = undefined, A extends AuthMode = "worksp
       if (options.permission) {
         if (!ctx) throw forbidden();
         assertCan(ctx, options.permission);
+      }
+
+      // Optional platform policy: unverified accounts are read-only inside workspaces.
+      if (ctx && req.method !== "GET" && !ctx.user.emailVerifiedAt) {
+        const platform = await getSetting("platform", DEFAULT_PLATFORM_SETTINGS);
+        if (platform.requireEmailVerification) throw forbidden("Verify your email address to make changes. Check your inbox or resend the link from the banner.");
       }
 
       const body = options.body ? options.body.parse(await readBody(req)) : (undefined as B);

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { FilePlus2, FileText, Sparkles } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { CONTENT_STATUSES, CONTENT_TYPE_LABELS, CONTENT_TYPES, humanize, type ContentType } from "@/lib/constants";
-import { timeAgo } from "@/lib/utils";
+
 import { TimeAgo } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 import { Badge, StatusBadge } from "@/components/ui/badge";

@@ -6,7 +6,7 @@ import useSWR from "swr";
 import * as Popover from "@radix-ui/react-popover";
 import { Bell, CheckCheck } from "lucide-react";
 import { api } from "@/lib/api-client";
-import { cn, timeAgo } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { TimeAgo } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 

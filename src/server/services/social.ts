@@ -98,8 +98,9 @@ export async function listPosts(workspaceId: string, p: PaginationInput & { stat
 export async function calendar(workspaceId: string, from: Date, to: Date) {
   return db.socialPost.findMany({
     where: { workspaceId, OR: [{ scheduledAt: { gte: from, lte: to } }, { publishedAt: { gte: from, lte: to } }] },
-    select: { id: true, platform: true, text: true, status: true, scheduledAt: true, publishedAt: true, socialAccount: { select: { handle: true } } },
+    include: { socialAccount: { select: { id: true, handle: true } }, campaign: { select: { id: true, name: true } } },
     orderBy: { scheduledAt: "asc" },
+    take: 500,
   });
 }
 

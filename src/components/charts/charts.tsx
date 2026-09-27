@@ -163,12 +163,12 @@ export function SimpleBarChart<T extends Record<string, unknown>>({ data, xKey, 
 }
 
 /** Donut with a value legend (the legend doubles as the table view for low-contrast slots). */
-export function DonutChart({ data, height = 220, format }: { data: { name: string; value: number }[]; height?: number; format?: (v: number) => string }) {
+export function DonutChart({ data, height = 220, format, stacked }: { data: { name: string; value: number }[]; height?: number; format?: (v: number) => string; stacked?: boolean }) {
   const total = data.reduce((a, d) => a + d.value, 0);
   // Fold series beyond 7 into "Other" so hues are never cycled.
   const rows = data.length > 8 ? [...data.slice(0, 7), { name: "Other", value: data.slice(7).reduce((a, d) => a + d.value, 0) }] : data;
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row">
+    <div className={cn("flex flex-col items-center gap-4", !stacked && "sm:flex-row")}>
       <div className="relative shrink-0" style={{ width: height, height }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

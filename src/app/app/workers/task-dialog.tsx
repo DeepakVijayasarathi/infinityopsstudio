@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { Check, Copy, FileText, Loader2, Pencil, RotateCcw, X } from "lucide-react";
 import { api } from "@/lib/api-client";
-import { formatDateTime, formatMicros } from "@/lib/utils";
+import { formatMicros } from "@/lib/utils";
 import { DateText } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Check, Cloud, CloudOff, Copy, Download, History, Link2, Loader2, MoreHorizontal, Save, Share2, Sparkles, Square, Trash2, Info, FileCode2, Type } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { CONTENT_TRANSITIONS, CONTENT_TYPE_LABELS, humanize, type ContentStatus, type ContentType } from "@/lib/constants";
-import { cn, formatDateTime, timeAgo, wordCount } from "@/lib/utils";
+import { cn, wordCount } from "@/lib/utils";
 import { TimeAgo, DateText } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";

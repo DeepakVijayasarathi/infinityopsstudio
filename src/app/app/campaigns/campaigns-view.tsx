@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Megaphone, Plus } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { CAMPAIGN_OBJECTIVES, CAMPAIGN_STATUSES, humanize } from "@/lib/constants";
-import { formatCompact, formatCurrency, formatDate } from "@/lib/utils";
+import { formatCompact, formatCurrency } from "@/lib/utils";
 import { DateText } from "@/components/ui/time";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, Badge } from "@/components/ui/badge";
