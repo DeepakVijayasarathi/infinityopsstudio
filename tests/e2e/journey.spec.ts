@@ -40,7 +40,8 @@ test("create a campaign", async () => {
 
 test("generate and save content", async () => {
   await page.goto("/app/content/new");
-  await page.locator("#f-topic").fill("Why single-origin beans taste different");
+  // Role locators skip the hidden copy React keeps briefly while streaming a page in.
+  await page.getByRole("textbox", { name: /Topic or brief/ }).fill("Why single-origin beans taste different");
   await page.locator("form").getByRole("button", { name: /^Generate/ }).click();
   const save = page.getByRole("button", { name: "Save & edit" });
   await expect(save).toBeEnabled({ timeout: 60_000 });
@@ -53,8 +54,9 @@ test("run an AI worker task", async () => {
   await page.goto("/app/workers");
   // Free workspaces start with the first two workers active; open the first one.
   await page.getByRole("link", { name: "Open workspace" }).first().click();
+  await page.waitForURL(/\/app\/workers\/[a-z0-9-]+/);
   await expect(page.getByText("Inactive")).toHaveCount(0);
-  await page.locator("#instructions").fill("Plan a two-week launch for our autumn seasonal menu");
+  await page.getByRole("textbox", { name: /Brief/ }).fill("Plan a two-week launch for our autumn seasonal menu");
   await page.getByRole("button", { name: /^Assign to/ }).click();
   await expect(page.getByText(/Awaiting approval|Queued|Running/).first()).toBeVisible({ timeout: 60_000 });
 });
