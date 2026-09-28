@@ -171,7 +171,7 @@ curl -H 'content-type: application/json' -d '{"email":"new@lead.com","firstName"
 
 | Method | Path | Access |
 |---|---|---|
-| POST | `/api/v1/copilot` | workspace member |
+| POST | `/api/v1/copilot` | workspace member — `{ message, history, voice? }`; `voice: true` asks for a short spoken reply |
 | POST | `/api/v1/copilot/execute` | per action (checked on execution) |
 
 ### AI Manager

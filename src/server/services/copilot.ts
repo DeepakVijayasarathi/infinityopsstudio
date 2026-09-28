@@ -306,13 +306,13 @@ async function freeAnswer(ctx: WorkspaceContext, message: string, history: ChatT
 
 const llmReplySchema = z.object({ reply: z.string().min(1).max(6000), actions: z.array(z.unknown()).max(4).default([]) });
 
-async function llmPlan(ctx: WorkspaceContext, message: string, history: ChatTurn[]): Promise<CopilotReply | null> {
+async function llmPlan(ctx: WorkspaceContext, message: string, history: ChatTurn[], voice = false): Promise<CopilotReply | null> {
   const ws = ctx.workspace.id;
   const workers = WORKER_TEMPLATES.map((w) => `${w.key} (${w.name}, ${w.title})`).join(", ");
   const system = `You are InfinityOps Copilot inside a marketing operations app. Decide how to help with the user's latest message.
 
 Reply with ONLY a JSON object: {"reply": "<markdown answer, under 200 words>", "actions": [<0-3 proposed actions>]}.
-Propose actions only when the user asks you to create or do something. The user approves each action before it runs, so describe what you'll do in "reply" rather than claiming it is done.
+${voice ? 'The user is talking to you by voice and will HEAR "reply": write at most 3 short, natural spoken sentences — no markdown, tables, lists, links or emoji. Lead with the answer.\n' : ""}Propose actions only when the user asks you to create or do something. The user approves each action before it runs, so describe what you'll do in "reply" rather than claiming it is done.
 
 Action shapes:
 - {"type":"launch_ai_campaign","goal":"<one-sentence goal>"}  (full campaign with strategy, content, social, email)
@@ -366,11 +366,11 @@ export function pickCapability(workerKey: string, instructions: string): string 
 
 // ─── Entry points ───
 
-export async function copilotPlan(ctx: WorkspaceContext, message: string, history: ChatTurn[] = []): Promise<CopilotReply> {
+export async function copilotPlan(ctx: WorkspaceContext, message: string, history: ChatTurn[] = [], opts: { voice?: boolean } = {}): Promise<CopilotReply> {
   const model = await resolveModel(null);
   if (model.provider !== "local") {
     try {
-      const planned = await llmPlan(ctx, message, history);
+      const planned = await llmPlan(ctx, message, history, opts.voice);
       if (planned) return planned;
     } catch (err) {
       logger.warn("Copilot LLM planner failed; falling back to rules", { err });

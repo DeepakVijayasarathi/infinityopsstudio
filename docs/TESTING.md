@@ -25,6 +25,7 @@ Pure logic with no I/O:
 - SEO page audit scoring and internal-link suggestions
 - AES-256-GCM encryption (fresh IV, tamper detection), hashing helpers, bcrypt, password policy, TOTP and recovery codes
 - AI model catalog, cost and credit calculation, pricing overrides; the local provider's routing, transforms, usage and streaming
+- Voice: Markdown-to-speech flattening, spoken commands (approve, approve all, dismiss, stop, goodbye) and wake-word detection
 - Traffic-source classification, domain allow-list matching, inbound-email parsing, landing-page content schema and the AI Manager's proposal rules
 - Plan ordering and limits, role permission nesting, Stripe webhook signature verification (valid, forged, stale)
 
@@ -58,6 +59,7 @@ Before the run, `tests/global-setup.ts` applies migrations with `prisma migrate 
 Playwright drives Chromium through real user journeys against a production build:
 
 - `public.spec.ts` — marketing navigation, pricing, blog article, redirect of protected pages to login, health endpoints.
+- `voice.spec.ts` — voice mode with a scripted microphone and speaker (headless Chromium has no speech engine): ask by voice, hear the answer, say “yes” and the drafts are created.
 - `journey.spec.ts` — one new customer, in order: sign up → create a campaign → generate and save content → assign a task to an AI worker → build an automation → ask Copilot and approve drafted posts → build a campaign with the AI autopilot → use a template and complete guided setup → generate and publish an AI landing page, submit its form and chat as a visitor, then reply from the inbox → run the AI Manager and approve a suggestion → open analytics → upgrade the plan (with invoice).
 
 ```bash
