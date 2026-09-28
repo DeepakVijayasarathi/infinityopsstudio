@@ -24,6 +24,9 @@ export type AICallOptions = {
 
 export type AICallResult = Usage & { text: string; model: string; provider: string; costMicros: number; credits: number; latencyMs: number };
 
+// A Claude Code call starts a CLI process and can think for a while; give it at least 3 minutes.
+const timeoutFor = (provider: string, configured: number) => (provider === "claude-code" ? Math.max(configured, 180_000) : configured);
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function prepare(opts: AICallOptions): Promise<{ model: ModelInfo; params: Omit<GenerateParams, "signal"> }> {
@@ -85,7 +88,7 @@ export async function generateText(opts: AICallOptions): Promise<AICallResult> {
 
   for (let attempt = 0; attempt <= AI_MAX_RETRIES; attempt++) {
     try {
-      const result = await provider.generate({ ...params, signal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS) });
+      const result = await provider.generate({ ...params, signal: AbortSignal.timeout(timeoutFor(model.provider, AI_REQUEST_TIMEOUT_MS)) });
       const latencyMs = Date.now() - started;
       const { costMicros, credits } = await record(opts, model, result, latencyMs);
       return { ...result, model: model.id, provider: model.provider, costMicros, credits, latencyMs };
@@ -114,7 +117,7 @@ export async function streamText(opts: AICallOptions, onComplete?: (text: string
   const provider = getProvider(model.provider);
   const encoder = new TextEncoder();
   const controllerAbort = new AbortController();
-  const timeout = AbortSignal.timeout(env().AI_REQUEST_TIMEOUT_MS * 2);
+  const timeout = AbortSignal.timeout(timeoutFor(model.provider, env().AI_REQUEST_TIMEOUT_MS) * 2);
   const signal = AbortSignal.any([controllerAbort.signal, timeout]);
 
   return new ReadableStream<Uint8Array>({

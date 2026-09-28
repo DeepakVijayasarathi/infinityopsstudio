@@ -85,7 +85,7 @@ export function AdminSettingsForm({ ai, platform, models, runtime }: { ai: AI; p
                       <p className="font-medium">{m.label}</p>
                       <code className="text-xs text-muted-foreground">{m.id}</code>
                     </td>
-                    <td className="py-2">{m.configured ? <Badge tone="success">Configured</Badge> : <Badge>Missing key</Badge>}</td>
+                    <td className="py-2">{m.configured ? <Badge tone="success">Configured</Badge> : <Badge>{m.provider === "claude-code" ? "Connect Claude above" : "Missing key"}</Badge>}</td>
                     <td className="py-2">
                       <Switch
                         checked={enabled.has(m.id)}

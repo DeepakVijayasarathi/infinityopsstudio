@@ -38,7 +38,7 @@ Generate secrets with `openssl rand -hex 32`.
 | `GOOGLE_AI_API_KEY` | — | Enables Gemini models |
 | `CLAUDE_CODE_ENABLED` | `0` | Offer the local Claude Code models even when another provider is the default. Implied by `AI_DEFAULT_PROVIDER=claude-code` |
 | `CLAUDE_CODE_PATH` | `claude` | Path to the Claude Code CLI binary |
-| `CLAUDE_CODE_OAUTH_TOKEN` | — | Long-lived token from `claude setup-token` (Claude Pro/Max). Lets the CLI run headless on a server; set it with `bash manage.sh connect-claude` |
+| `CLAUDE_CODE_OAUTH_TOKEN` | — | Long-lived token from `claude setup-token` (Claude Pro/Max). Lets the CLI run headless on a server; set it with `bash manage.sh connect-claude`, or connect from **Admin → Settings** instead (stored encrypted in the database, takes priority, no restart) |
 | `CLAUDE_CODE_MAX_CONCURRENCY` | `2` | Maximum CLI processes running at once (per app or worker process) |
 
 Models only appear in pickers when their provider has a key. See [AI_ARCHITECTURE.md](AI_ARCHITECTURE.md).

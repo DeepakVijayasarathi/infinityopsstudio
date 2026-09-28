@@ -2,7 +2,7 @@ import { env } from "../env";
 import { DEFAULT_AI_SETTINGS, getSetting, type AISettings } from "../settings";
 import { DEFAULT_MODEL_BY_PROVIDER, MODEL_CATALOG, findModel } from "./models";
 import { anthropicProvider } from "./providers/anthropic";
-import { claudeCodeProvider } from "./providers/claude-code";
+import { claudeCodeProvider, syncClaudeConnection } from "./providers/claude-code";
 import { googleProvider } from "./providers/google";
 import { localProvider } from "./providers/local";
 import { openaiProvider } from "./providers/openai";
@@ -27,7 +27,7 @@ export async function aiSettings(): Promise<AISettings> {
 export type AvailableModel = ModelInfo & { configured: boolean; enabled: boolean };
 
 export async function listModels(): Promise<AvailableModel[]> {
-  const s = await aiSettings();
+  const [s] = await Promise.all([aiSettings(), syncClaudeConnection()]);
   return MODEL_CATALOG.map((m) => ({
     ...m,
     configured: PROVIDERS[m.provider].isConfigured(),

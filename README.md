@@ -58,6 +58,8 @@ No API keys are needed: with `AI_DEFAULT_PROVIDER=local` every AI feature runs o
 
 ### Use your own Claude, without an API key
 
+On a server: sign in as the platform admin, open **Admin → Settings → Claude Pro / Max plan**, run `claude setup-token` on any computer and paste the token. It's tested and switched on immediately — no restart. The rest of this section covers the command-line alternatives.
+
 If [Claude Code](https://claude.com/claude-code) is installed and signed in on the machine running the app, every AI feature can run through it on your Claude plan:
 
 ```bash

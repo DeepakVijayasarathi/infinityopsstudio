@@ -425,6 +425,9 @@ Served with `Access-Control-Allow-Origin: *`, no cookies, and rate-limited per I
 
 ### Platform admin
 
+Claude plan connection (super admin): `GET /api/v1/admin/claude` (status — never returns the token), `POST /api/v1/admin/claude` `{ token }` (tests, then stores encrypted), `POST /api/v1/admin/claude/test`, `DELETE /api/v1/admin/claude`.
+
+
 | Method | Path | Access |
 |---|---|---|
 | GET | `/api/v1/admin/ai` | super admin |

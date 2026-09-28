@@ -20,6 +20,7 @@ cd /opt/infinityops && sudo bash deploy.sh
 | `bash manage.sh make-admin you@company.com` | Creates your super-admin account and company workspace (Enterprise plan), or promotes an existing user. Prompts for name, company and password |
 | `bash manage.sh remove-demo` | Deletes the Northwind Growth demo workspace and demo users (refuses until another admin exists) and sets `SEED_DEMO=0` |
 | `bash manage.sh reset-password you@company.com` | Sets a new password, unlocks the account and signs out every session |
+| *(browser)* **Admin → Settings → Claude Pro / Max plan** | Paste a `claude setup-token` token; it's tested, stored encrypted and used by the web and worker containers within 30 seconds — no restart. Test and disconnect from the same card |
 | `bash manage.sh connect-claude` | Uses a Claude Pro/Max plan for all AI via the bundled Claude Code CLI and a `claude setup-token` token; verifies it and falls back to demo AI if the test fails |
 | `bash manage.sh disconnect-claude` | Switches back to the built-in demo AI |
 | `bash manage.sh status` | Lists users, workspaces, demo data and the active AI engine |
